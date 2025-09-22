@@ -1,7 +1,7 @@
-# While - 환경설정 UI 프로젝트
+# While - 미연시 게임 UI 프로젝트
 
 ## 프로젝트 개요
-미연시 게임 UI를 개발하는 React + TypeScript 프로젝트입니다.
+미연시 게임의 설정 페이지와 게임 관리 UI를 개발하는 React + TypeScript 프로젝트입니다.
 
 ## 기술 스택
 - **Frontend**: React 19.1.1 + TypeScript
@@ -13,15 +13,25 @@
 ## 프로젝트 구조
 ```
 src/
-├── assets/          # 정적 리소스 (이미지, 아이콘 등)
-├── components/      # 재사용 가능한 컴포넌트
-├── pages/          # 페이지 컴포넌트
-├── stores/         # Zustand 상태 관리
-├── styles/         # 공통 스타일, 테마
-├── types/          # TypeScript 타입 정의
-├── utils/          # 유틸리티 함수
-├── App.tsx         # 메인 앱 컴포넌트
-└── main.tsx        # 앱 진입점
+├── assets/                    # 정적 리소스 (이미지, 아이콘 등)
+├── components/               # 재사용 가능한 컴포넌트
+│   ├── Settings/            # 설정 페이지 관련 컴포넌트
+│   │   ├── LeftNavigation/  # 좌측 네비게이션 메뉴
+│   │   ├── SettingGroup/    # 설정 그룹 컴포넌트
+│   │   └── SettingsContent/ # 설정 콘텐츠 영역
+│   └── common/              # 공통 컴포넌트
+│       └── Slider/          # 슬라이더 컴포넌트
+├── pages/                   # 페이지 컴포넌트
+│   └── Settings/           # 설정 페이지
+├── stores/                 # Zustand 상태 관리
+├── styles/                 # 공통 스타일, 테마
+│   ├── globalStyles.ts     # 글로벌 스타일
+│   ├── theme.ts           # 테마 정의
+│   └── index.ts           # 스타일 내보내기
+├── types/                 # TypeScript 타입 정의
+├── utils/                 # 유틸리티 함수
+├── App.tsx               # 메인 앱 컴포넌트
+└── main.tsx              # 앱 진입점
 ```
 
 ## 개발 명령어

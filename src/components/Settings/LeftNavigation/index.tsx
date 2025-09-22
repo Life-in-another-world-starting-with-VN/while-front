@@ -7,15 +7,11 @@ import {
   Divider,
   BackButton,
 } from './styled';
-
-interface NavigationItem {
-  label: string;
-  isActive?: boolean;
-}
+import type { NavigationItem, PageType } from '../../../types/navigation';
 
 interface LeftNavigationProps {
   navigationItems: NavigationItem[];
-  onMenuClick?: (index: number) => void;
+  onMenuClick?: (pageType: PageType) => void;
   onBackClick?: () => void;
 }
 
@@ -32,7 +28,7 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
           <MenuItem
             key={index}
             isActive={item.isActive}
-            onClick={() => onMenuClick?.(index)}
+            onClick={() => onMenuClick?.(item.pageType)}
           >
             {item.label}
           </MenuItem>

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { theme } from '../../../styles';
+import { theme } from '../../../../styles';
 
 export const RightSection = styled.div`
   flex: 1;

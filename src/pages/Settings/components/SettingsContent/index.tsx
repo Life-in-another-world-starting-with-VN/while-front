@@ -1,6 +1,6 @@
 import React from 'react';
 import SettingGroup from '../SettingGroup';
-import Slider from '../../common/Slider';
+import Slider from '../../../../components/common/Slider';
 import {
   RightSection,
   SettingsGrid,

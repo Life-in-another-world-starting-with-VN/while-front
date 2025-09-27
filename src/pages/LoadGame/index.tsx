@@ -1,19 +1,19 @@
 import React from 'react';
-import LeftNavigation from '../components/Settings/LeftNavigation';
-import SettingsContent from '../components/Settings/SettingsContent';
-import { SettingsContainer } from './Settings/styled';
-import type { NavigationItem, PageType } from '../types/navigation';
+import LeftNavigation from '../../components/common/LeftNavigation';
+import LoadGameContent from './components/LoadGameContent';
+import { LoadGameContainer } from './styled';
+import type { NavigationItem, PageType } from '../../types/navigation';
 
-interface SettingsProps {
+interface LoadGameProps {
   onNavigate?: (pageType: PageType) => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
+const LoadGame: React.FC<LoadGameProps> = ({ onNavigate }) => {
   const navigationItems: NavigationItem[] = [
     { label: '대사록', pageType: 'dialogue' },
     { label: '저장하기', pageType: 'saveGame' },
-    { label: '불러오기', pageType: 'loadGame' },
-    { label: '환경설정', pageType: 'settings', isActive: true },
+    { label: '불러오기', pageType: 'loadGame', isActive: true },
+    { label: '환경설정', pageType: 'settings' },
     { label: '메인 메뉴', pageType: 'mainMenu' },
     { label: '조작방법', pageType: 'controls' },
     { label: '종료하기', pageType: 'exit' },
@@ -27,20 +27,20 @@ const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
     console.log('Back button clicked');
   };
 
-  const handleMuteClick = () => {
-    console.log('Mute button clicked');
+  const handleSlotClick = (slotNumber: number) => {
+    console.log(`Save slot ${slotNumber} clicked`);
   };
 
   return (
-    <SettingsContainer>
+    <LoadGameContainer>
       <LeftNavigation
         navigationItems={navigationItems}
         onMenuClick={handleMenuClick}
         onBackClick={handleBackClick}
       />
-      <SettingsContent onMuteClick={handleMuteClick} />
-    </SettingsContainer>
+      <LoadGameContent onSlotClick={handleSlotClick} />
+    </LoadGameContainer>
   );
 };
 
-export default Settings;
+export default LoadGame;

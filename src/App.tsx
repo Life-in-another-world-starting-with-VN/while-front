@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { GlobalStyles } from './styles';
 import Settings from './pages/Settings';
 import LoadGame from './pages/LoadGame';
 import type { PageType } from './types/navigation';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { GlobalStyles } from "./styles/globalStyles";
 import QuestionPage from "./pages/QuestionPage";
 import MainPage from "./pages/MainPage";
 

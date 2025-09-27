@@ -1,19 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
 import Card from './components/Card';
 import QuestionBlock from './components/QuestionBlock';
 import OptionButton from './components/OptionButton';
 import InputBox from './components/InputBox';
 import StartButton from './components/StartButton';
+import { PageContainer } from './styled';
 
-const PageContainer = styled.div`
-  width: 100%;
-  height: 100vh;
-  background-color: #fff6f6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
 
 function QuestionPage() {
   return (

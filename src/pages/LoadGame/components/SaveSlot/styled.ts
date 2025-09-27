@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { theme } from '../../../styles';
+import { theme } from '../../../../styles';
 
 export const SaveSlotContainer = styled.div`
   width: 24.3125rem;

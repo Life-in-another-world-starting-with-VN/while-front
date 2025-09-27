@@ -1,5 +1,4 @@
 import React from 'react';
-import styled from 'styled-components';
 import Sidebar from './components/Sidebar';
 import LogoBlock from './components/LogoBlock';
 import MenuButton from './components/MenuButton';
@@ -12,12 +11,7 @@ import Exit from '../../assets/MainBtnicon/exit.svg';
 import char1 from '../../assets/MainCharacter/char1.png';
 import char2 from '../../assets/MainCharacter/char2.png';
 import char3 from '../../assets/MainCharacter/char3.png';
-const PageContainer = styled.div`
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  background: #e8f4ff;
-`;
+import { PageContainer } from './styled';
 
 function MainPage() {
   return (

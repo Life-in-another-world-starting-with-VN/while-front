@@ -74,6 +74,22 @@ export const slider = {
   borderRadius: borderRadius.lg,
 } as const;
 
+export const breakpoints = {
+  mobile: '480px',
+  tablet: '768px',
+  desktop: '1024px',
+  wide: '1440px',
+  ultraWide: '1920px',
+} as const;
+
+export const media = {
+  mobile: `@media (max-width: ${breakpoints.mobile})`,
+  tablet: `@media (max-width: ${breakpoints.tablet})`,
+  desktop: `@media (max-width: ${breakpoints.desktop})`,
+  wide: `@media (max-width: ${breakpoints.wide})`,
+  ultraWide: `@media (min-width: ${breakpoints.ultraWide})`,
+} as const;
+
 export const theme = {
   colors,
   typography,
@@ -81,6 +97,8 @@ export const theme = {
   borderRadius,
   shadows,
   slider,
+  breakpoints,
+  media,
 } as const;
 
 export type Theme = typeof theme;

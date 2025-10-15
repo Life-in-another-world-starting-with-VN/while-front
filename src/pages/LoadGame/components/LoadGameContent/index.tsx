@@ -5,41 +5,29 @@ import {
   SaveSlotsGrid,
   QuickSaveInfo,
 } from './styled';
-
-interface SaveData {
-  slotNumber: number;
-  title?: string;
-  timestamp?: string;
-  isEmpty?: boolean;
-}
+import { SaveSlotData } from '../../index'; 
 
 interface LoadGameContentProps {
-  saveSlots?: SaveData[];
-  onSlotClick?: (slotNumber: number) => void;
+  saveSlots: SaveSlotData[];
+  onSlotClick: (slotNumber: number, saveId?: string) => void;
 }
 
 const LoadGameContent: React.FC<LoadGameContentProps> = ({
-  saveSlots = [],
+  saveSlots,
   onSlotClick,
 }) => {
-  const defaultSlots: SaveData[] = Array.from({ length: 6 }, (_, index) => ({
-    slotNumber: index + 1,
-    isEmpty: true,
-  }));
-
-  const slots = saveSlots.length > 0 ? saveSlots : defaultSlots;
 
   return (
     <RightSection>
       <SaveSlotsGrid>
-        {slots.map((slot) => (
+        {saveSlots.map((slot) => (
           <SaveSlot
             key={slot.slotNumber}
             slotNumber={slot.slotNumber}
             title={slot.title}
             timestamp={slot.timestamp}
             isEmpty={slot.isEmpty}
-            onClick={() => onSlotClick?.(slot.slotNumber)}
+            onClick={() => onSlotClick(slot.slotNumber, slot.saveId)} 
           />
         ))}
       </SaveSlotsGrid>

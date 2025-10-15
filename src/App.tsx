@@ -30,7 +30,11 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/Quest" element={<QuestionPage />} />
+        <Route path="/Settings" element={<Settings onNavigate={handleNavigate} />} />
+        <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} />} />
       </Routes>
+      <GlobalStyles />
+      {/* {renderCurrentPage()} */}
     </Router>
   );
 }

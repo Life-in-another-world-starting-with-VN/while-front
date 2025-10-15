@@ -1,122 +1,217 @@
-import React from 'react';
-import styled from 'styled-components';
-import { GlobalStyles, theme } from '../../styles';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import styled from "styled-components";
+import { GlobalStyles, theme } from "../../styles";
+import { clearStoredRefreshToken, useTokenRefresh } from "../../hooks/useTokenRefresh";
 
-const Container = styled.div`
+const Container = styled.main`
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   background-color: ${theme.colors.background};
+  color: ${theme.colors.text};
   padding: ${theme.spacing.xl};
   display: flex;
   flex-direction: column;
-  gap: ${theme.spacing.lg};
+  gap: ${theme.spacing.xl};
 `;
 
 const Title = styled.h1`
   font-family: ${theme.typography.fontFamily};
   font-size: ${theme.typography.sizes.title};
   color: ${theme.colors.main};
-  text-align: center;
 `;
 
-const Subtitle = styled.h2`
-  font-family: ${theme.typography.fontFamily};
-  font-size: ${theme.typography.sizes.option};
-  color: ${theme.colors.text};
-`;
-
-const ColorPalette = styled.div`
+const Card = styled.section`
+  background-color: ${theme.colors.sub3};
+  border-radius: ${theme.borderRadius.lg};
+  padding: ${theme.spacing.lg};
   display: flex;
+  flex-direction: column;
   gap: ${theme.spacing.md};
-  flex-wrap: wrap;
-`;
-
-const ColorBox = styled.div<{ color: string; label: string }>`
-  width: 100px;
-  height: 100px;
-  background-color: ${props => props.color};
-  border-radius: ${theme.borderRadius.md};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
   box-shadow: ${theme.shadows.card};
+`;
 
-  &::after {
-    content: '${props => props.label}';
-    position: absolute;
-    bottom: -${theme.spacing.lg};
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: ${theme.typography.sizes.label};
-    color: ${theme.colors.grayText};
-    white-space: nowrap;
+const SectionTitle = styled.h2`
+  font-size: ${theme.typography.sizes.option};
+  margin: 0;
+`;
+
+const TokenTextArea = styled.textarea`
+  width: 100%;
+  min-height: 120px;
+  border-radius: ${theme.borderRadius.md};
+  border: 1px solid ${theme.colors.sub1};
+  padding: ${theme.spacing.md};
+  font-size: ${theme.typography.sizes.body};
+  resize: vertical;
+  background-color: ${theme.colors.background};
+  color: inherit;
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${theme.spacing.sm};
+`;
+
+const Button = styled.button<{ $tone?: "primary" | "neutral" | "danger" }>`
+  padding: ${theme.spacing.sm} ${theme.spacing.md};
+  border-radius: ${theme.borderRadius.md};
+  font-size: ${theme.typography.sizes.button};
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease;
+
+  ${({ $tone }) => {
+    switch ($tone) {
+      case "danger":
+        return `
+          background-color: ${theme.colors.sub2};
+          color: ${theme.colors.background};
+        `;
+      case "neutral":
+        return `
+          background-color: ${theme.colors.unselected};
+          color: ${theme.colors.text};
+        `;
+      default:
+        return `
+          background-color: ${theme.colors.main};
+          color: ${theme.colors.background};
+        `;
+    }
+  }}
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
   }
 `;
 
-const SliderTest = styled.div`
-  width: 350px;
-  height: ${theme.slider.height};
-  background-color: ${theme.slider.trackColor};
-  border-radius: ${theme.slider.borderRadius};
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    width: ${theme.slider.thumbSize};
-    height: 25px;
-    background-color: ${theme.slider.thumbColor};
-    border-radius: ${theme.slider.borderRadius};
-    left: 244px;
-    top: 0;
-  }
+const StatusText = styled.p`
+  font-size: ${theme.typography.sizes.body};
+  margin: 0;
 `;
 
-function Test() {
+const JsonOutput = styled.pre`
+  background-color: ${theme.colors.background};
+  color: ${theme.colors.text};
+  border-radius: ${theme.borderRadius.md};
+  border: 1px solid ${theme.colors.sub1};
+  padding: ${theme.spacing.md};
+  font-size: ${theme.typography.sizes.label};
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+`;
+
+const REFRESH_STORAGE_KEY = "refresh_token";
+
+function TokenRefreshTest() {
+  const { refreshAccessToken, isRefreshing, refreshError } = useTokenRefresh();
+  const [tokenInput, setTokenInput] = useState("");
+  const [storedToken, setStoredToken] = useState("");
+  const [lastResponse, setLastResponse] = useState<Awaited<ReturnType<typeof refreshAccessToken>> | null>(null);
+  const [callError, setCallError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const current = localStorage.getItem(REFRESH_STORAGE_KEY) ?? "";
+    setTokenInput(current);
+    setStoredToken(current);
+  }, []);
+
+  const handleSyncStoredToken = useCallback(() => {
+    const current = localStorage.getItem(REFRESH_STORAGE_KEY) ?? "";
+    setTokenInput(current);
+    setStoredToken(current);
+  }, []);
+
+  const handleSave = useCallback(() => {
+    const trimmed = tokenInput.trim();
+    localStorage.setItem(REFRESH_STORAGE_KEY, trimmed);
+    setStoredToken(trimmed);
+  }, [tokenInput]);
+
+  const handleClear = useCallback(() => {
+    clearStoredRefreshToken();
+    setStoredToken("");
+    setTokenInput("");
+    setLastResponse(null);
+    setCallError(null);
+  }, []);
+
+  const handleRefresh = useCallback(async () => {
+    setCallError(null);
+    setLastResponse(null);
+    try {
+      const result = await refreshAccessToken();
+      setLastResponse(result);
+    } catch (error) {
+      setCallError(error instanceof Error ? error.message : "토큰 갱신 중 알 수 없는 오류가 발생했습니다.");
+    } finally {
+      handleSyncStoredToken();
+    }
+  }, [refreshAccessToken, handleSyncStoredToken]);
+
+  const formattedResponse = useMemo(() => {
+    if (!lastResponse) {
+      return "";
+    }
+
+    try {
+      return JSON.stringify(lastResponse, null, 2);
+    } catch {
+      return String(lastResponse);
+    }
+  }, [lastResponse]);
+
   return (
     <>
       <GlobalStyles />
       <Container>
-        <Title>While - 테마 테스트</Title>
+        <Title>토큰 리프레시 훅 테스트</Title>
 
-        <Subtitle>색상 팔레트</Subtitle>
-        <ColorPalette>
-          <ColorBox color={theme.colors.main} label="메인" />
-          <ColorBox color={theme.colors.sub1} label="서브1" />
-          <ColorBox color={theme.colors.sub2} label="서브2" />
-          <ColorBox color={theme.colors.sub3} label="서브3" />
-          <ColorBox color={theme.colors.text} label="텍스트" />
-          <ColorBox color={theme.colors.grayText} label="회색텍스트" />
-          <ColorBox color={theme.colors.unselected} label="선택안함" />
-        </ColorPalette>
+        <Card>
+          <SectionTitle>리프레시 토큰 관리</SectionTitle>
+          <StatusText>
+            현재 저장된 토큰: {storedToken ? `${storedToken.slice(0, 24)}...` : "저장된 토큰 없음"}
+          </StatusText>
+          <TokenTextArea
+            value={tokenInput}
+            placeholder="refresh_token 값을 여기에 입력하거나 붙여넣으세요."
+            onChange={(event) => setTokenInput(event.target.value)}
+          />
+          <ButtonRow>
+            <Button onClick={handleSave} disabled={!tokenInput.trim()}>
+              로컬스토리지에 저장
+            </Button>
+            <Button $tone="neutral" onClick={handleSyncStoredToken}>
+              로컬스토리지에서 불러오기
+            </Button>
+            <Button $tone="danger" onClick={handleClear}>
+              토큰 비우기
+            </Button>
+          </ButtonRow>
+        </Card>
 
-        <Subtitle>슬라이더 예시</Subtitle>
-        <SliderTest />
-
-        <div>
-          <div style={{ fontSize: theme.typography.sizes.title, color: theme.colors.main }}>
-            제목 텍스트 (70px)
-          </div>
-          <div style={{ fontSize: theme.typography.sizes.option, color: theme.colors.text }}>
-            옵션 텍스트 (40px)
-          </div>
-          <div style={{ fontSize: theme.typography.sizes.subOption, color: theme.colors.unselected }}>
-            하위 옵션 텍스트 (35px)
-          </div>
-          <div style={{ fontSize: theme.typography.sizes.button, color: theme.colors.grayText }}>
-            버튼 텍스트 (25px)
-          </div>
-          <div style={{ fontSize: theme.typography.sizes.body, color: theme.colors.text }}>
-            기본 텍스트 (20px)
-          </div>
-          <div style={{ fontSize: theme.typography.sizes.label, color: theme.colors.grayText }}>
-            라벨 텍스트 (14px)
-          </div>
-        </div>
+        <Card>
+          <SectionTitle>토큰 갱신 실행</SectionTitle>
+          <StatusText>상태: {isRefreshing ? "갱신 중..." : "대기 중"}</StatusText>
+          {refreshError && <StatusText>훅 에러: {refreshError}</StatusText>}
+          {callError && <StatusText>요청 에러: {callError}</StatusText>}
+          <Button onClick={handleRefresh} disabled={isRefreshing}>
+            토큰 갱신 요청 보내기
+          </Button>
+          <StatusText>응답</StatusText>
+          <JsonOutput>{formattedResponse || "응답이 여기에 표시됩니다."}</JsonOutput>
+        </Card>
       </Container>
     </>
   );
 }
 
-export default Test;
+export default TokenRefreshTest;

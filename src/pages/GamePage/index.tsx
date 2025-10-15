@@ -7,7 +7,7 @@ import {
   mockScenes,
   mockMenuItems,
   mockInitialGameState,
-} from '../../data/mockGameData';
+} from './data/mockGameData';
 import DialogueBox from './components/DialogueBox';
 import GameMenu from './components/GameMenu';
 import ChoiceButtons from './components/ChoiceButtons';

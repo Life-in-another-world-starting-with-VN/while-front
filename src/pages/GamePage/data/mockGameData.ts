@@ -1,4 +1,4 @@
-import type { Character, Scene, MenuItem } from '../types/game';
+import type { Character, Scene, MenuItem } from '../../../types/game';
 
 // 캐릭터 목 데이터
 export const mockCharacters: Record<string, Character> = {

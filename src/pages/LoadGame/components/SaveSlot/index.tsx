@@ -25,7 +25,7 @@ const SaveSlot: React.FC<SaveSlotProps> = ({
     <SaveSlotContainer onClick={onClick}>
       <SaveSlotContent>
         {isEmpty ? (
-          <SaveSlotTitle></SaveSlotTitle>
+          <SaveSlotTitle>빈 슬롯 {slotNumber}</SaveSlotTitle>
         ) : (
           <>
             <SaveSlotTitle>{title || `저장 파일 ${slotNumber}`}</SaveSlotTitle>

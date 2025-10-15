@@ -9,6 +9,20 @@ export const GlobalStyles = createGlobalStyle`
     font-display: swap;
   }
 
+  @font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/Pretendard-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+  }
+
   * {
     margin: 0;
     padding: 0;
@@ -54,7 +68,7 @@ export const GlobalStyles = createGlobalStyle`
   input {
     border: none;
     outline: none;
-    font-family: inherit;
+    font-family: 'Pretendard', sans-serif;
   }
 
   /* 커스텀 스크롤바 */

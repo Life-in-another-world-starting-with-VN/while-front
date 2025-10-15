@@ -1,39 +1,26 @@
-import React, { useState } from 'react';
 import Settings from './pages/Settings';
 import LoadGame from './pages/LoadGame';
-import type { PageType } from './types/navigation';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import QuestionPage from "./pages/QuestionPage";
 import MainPage from "./pages/MainPage";
-
+import{ GlobalStyles }from './styles/GlobalStyles';
+import GamePage from './pages/GamePage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>('settings');
 
-  const handleNavigate = (pageType: PageType) => {
-    setCurrentPage(pageType);
-  };
-
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'settings':
-        return <Settings onNavigate={handleNavigate} />;
-      case 'loadGame':
-        return <LoadGame onNavigate={handleNavigate} />;
-      default:
-        return <Settings onNavigate={handleNavigate} />;
-    }
-  };
 
   return (
+    
     <Router>
+      <GlobalStyles />
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/Quest" element={<QuestionPage />} />
-        <Route path="/Settings" element={<Settings onNavigate={handleNavigate} />} />
-        <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} />} />
+        <Route path="/Settings" element={<Settings />} />
+        <Route path="/LoadGame" element={<LoadGame/>} />
+        <Route path="/StartGame" element={<GamePage  />} />
       </Routes>
-      <GlobalStyles />
+
       {/* {renderCurrentPage()} */}
     </Router>
   );

@@ -1,5 +1,4 @@
 // App.tsx
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { GlobalStyles } from "./styles/globalStyles";
 import QuestionPage from "./pages/QuestionPage";

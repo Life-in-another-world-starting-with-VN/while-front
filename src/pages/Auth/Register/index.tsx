@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import styled from "styled-components";
 
 type FormData = {
@@ -147,6 +147,7 @@ function RegisterPage() {
       let payload: unknown = null;
       try {
         payload = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (parseError) {
         // Non-JSON responses are treated as plain failures.
       }

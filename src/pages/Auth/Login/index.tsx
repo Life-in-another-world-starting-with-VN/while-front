@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 type FormData = {
@@ -123,24 +124,28 @@ const Message = styled.p<{ $tone: "success" | "error" }>`
   padding: 12px 14px;
 `;
 
-const TokenPreview = styled.pre`
-  margin: 0;
-  max-height: 180px;
-  overflow: auto;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #f8fafc;
-  font-size: 13px;
-  line-height: 1.4;
-  color: #1f2937;
-  border: 1px solid #e2e8f0;
+const Footer = styled.div`
+  display: flex;
+  justify-content: center;
+  font-size: 14px;
+  color: #475467;
+`;
+
+const FooterLink = styled(Link)`
+  margin-left: 6px;
+  color: #3478f6;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 function LoginPage() {
   const [formData, setFormData] = useState<FormData>({ username: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [authPayload, setAuthPayload] = useState<LoginSuccess | null>(null);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -150,7 +155,6 @@ function LoginPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFeedback(null);
-    setAuthPayload(null);
     setIsSubmitting(true);
 
     try {
@@ -171,22 +175,40 @@ function LoginPage() {
         body,
       });
 
-      const payload = await response.json().catch(() => null);
+      const payload: unknown = await response.json().catch(() => null);
 
-      if (!response.ok) {
-        const errorMessage =
-          Array.isArray(payload?.detail) && payload.detail.length > 0
-            ? payload.detail.map((item: { msg?: unknown }) => String(item.msg ?? "오류가 발생했습니다.")).join("\n")
-            : payload && typeof payload === "object" && "detail" in payload && !Array.isArray(payload.detail)
-              ? String(payload.detail)
-              : "로그인에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.";
+      if (!response.ok || !payload) {
+        const errorMessage = (() => {
+          if (payload && typeof payload === "object") {
+            const detail = (payload as { detail?: unknown }).detail;
+            if (Array.isArray(detail) && detail.length > 0) {
+              return detail
+                .map((item) => String((item as { msg?: unknown }).msg ?? "오류가 발생했습니다."))
+                .join("\n");
+            }
+            if (typeof detail === "string") {
+              return detail;
+            }
+          }
+          return "로그인에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.";
+        })();
 
         setFeedback({ type: "error", text: errorMessage });
         return;
       }
 
+      const loginPayload = payload as Partial<LoginSuccess>;
+      if (typeof loginPayload.refresh_token === "string" && loginPayload.refresh_token.length > 0) {
+        localStorage.setItem("refresh_token", loginPayload.refresh_token);
+      } else {
+        setFeedback({
+          type: "error",
+          text: "서버에서 리프레시 토큰을 받지 못했습니다. 다시 시도해 주세요.",
+        });
+        return;
+      }
+
       setFeedback({ type: "success", text: "로그인에 성공했습니다!" });
-      setAuthPayload(payload as LoginSuccess);
       setFormData({ username: "", password: "" });
     } catch (error) {
       setFeedback({
@@ -237,14 +259,13 @@ function LoginPage() {
             {isSubmitting ? "처리 중..." : "로그인"}
           </SubmitButton>
         </Form>
-
-        {authPayload ? (
-          <TokenPreview>{JSON.stringify(authPayload, null, 2)}</TokenPreview>
-        ) : null}
+        <Footer>
+          아직 계정이 없으신가요?
+          <FooterLink to="/register">회원가입</FooterLink>
+        </Footer>
       </Card>
     </PageContainer>
   );
 }
 
 export default LoginPage;
-

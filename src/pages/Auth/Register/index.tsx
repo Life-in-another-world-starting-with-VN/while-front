@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 type FormData = {
@@ -117,6 +118,24 @@ const Message = styled.p<{ $tone: "success" | "error" }>`
   padding: 12px 14px;
 `;
 
+const Footer = styled.div`
+  display: flex;
+  justify-content: center;
+  font-size: 14px;
+  color: #475467;
+`;
+
+const FooterLink = styled(Link)`
+  margin-left: 6px;
+  color: #3478f6;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 function RegisterPage() {
   const [formData, setFormData] = useState<FormData>({
     username: "",
@@ -229,6 +248,10 @@ function RegisterPage() {
             {isSubmitting ? "처리 중..." : "가입하기"}
           </SubmitButton>
         </Form>
+        <Footer>
+          이미 계정이 있으신가요?
+          <FooterLink to="/login">로그인</FooterLink>
+        </Footer>
       </Card>
     </PageContainer>
   );

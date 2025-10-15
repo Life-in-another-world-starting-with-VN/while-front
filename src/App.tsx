@@ -9,6 +9,7 @@ import RegisterPage from "./pages/Auth/Register";
 import LoginPage from "./pages/Auth/Login";
 import MainPage from "./pages/MainPage";
 import GamePage from "./pages/GamePage";
+import Test from "./pages/Test"
 import { GlobalStyles } from './styles';
 
 
@@ -40,6 +41,7 @@ function App() {
         <Route path="/Game" element={<GamePage />} />
         <Route path="/Settings" element={<Settings onNavigate={handleNavigate} />} />
         <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} />} />
+        <Route path="/test" element={<Test />} />
       </Routes>
       <GlobalStyles />
       {/* {renderCurrentPage()} */}

@@ -12,15 +12,16 @@ import char1 from '../../assets/MainCharacter/char1.png';
 import char2 from '../../assets/MainCharacter/char2.png';
 import char3 from '../../assets/MainCharacter/char3.png';
 import { PageContainer } from './styled';
+import { Link } from 'react-router-dom';
 
 function MainPage() {
   return (
     <PageContainer>
       <Sidebar>
         <LogoBlock />
-        <MenuButton><Icon src={Play} /> 게임 시작</MenuButton>
-        <MenuButton><Icon src={Cell} /> 불러오기</MenuButton>
-        <MenuButton><Icon src={Option} /> 설정</MenuButton>
+        <Link to="/game" style={{color: 'white', textDecorationLine: 'none', width: "100%"}}><MenuButton><Icon src={Play} /> 게임 시작</MenuButton></Link>
+        <Link to="/loadgame" style={{color: 'white', textDecorationLine: 'none', width: "100%"}}><MenuButton><Icon src={Cell} /> 불러오기</MenuButton></Link>
+        <Link to="/settings" style={{color: 'white', textDecorationLine: 'none', width: "100%"}}><MenuButton><Icon src={Option} /> 설정</MenuButton></Link>
         <MenuButton><Icon src={Exit} /> 종료</MenuButton>
       </Sidebar>
       <Content>

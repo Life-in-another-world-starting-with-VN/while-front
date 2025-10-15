@@ -13,6 +13,7 @@ import GameMenu from './components/GameMenu';
 import ChoiceButtons from './components/ChoiceButtons';
 import AutoPlayModal from './components/AutoPlayModal';
 import CharacterSprite from './components/CharacterSprite';
+import DialogueLogModal from './components/DialogueLogModal';
 
 interface GamePageProps {
   backgroundImage?: string;
@@ -64,9 +65,17 @@ const PinkBlurOverlay = styled.div`
   z-index: 0;
 `;
 
+interface DialogueLogItem {
+  characterName: string;
+  characterColor?: string;
+  text: string;
+}
+
 const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   const [gameState, setGameState] = useState<GameState>(mockInitialGameState);
   const [isAutoPlayModalOpen, setIsAutoPlayModalOpen] = useState(false);
+  const [isDialogueLogModalOpen, setIsDialogueLogModalOpen] = useState(false);
+  const [dialogueLog, setDialogueLog] = useState<DialogueLogItem[]>([]);
 
   // 현재 씬과 대사 가져오기
   const currentScene = mockScenes[gameState.currentSceneId];
@@ -84,6 +93,18 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   // 다음 대사로 진행
   const handleNextDialogue = () => {
     if (!currentScene) return;
+
+    // 현재 대사를 대사록에 추가
+    if (currentCharacter && currentDialogue) {
+      setDialogueLog(prev => [
+        ...prev,
+        {
+          characterName: currentCharacter.displayName,
+          characterColor: currentCharacter.color,
+          text: currentDialogue.text,
+        },
+      ]);
+    }
 
     if (gameState.currentDialogueIndex < currentScene.dialogues.length - 1) {
       // 다음 대사로
@@ -137,8 +158,7 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   const handleMenuAction = (action: MenuAction) => {
     switch (action) {
       case 'dialogueLog':
-        console.log('대사록:', gameState.history);
-        // TODO: 대사록 모달 열기
+        setIsDialogueLogModalOpen(true);
         break;
       case 'skip':
         handleNextDialogue();
@@ -209,6 +229,12 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
         onClose={() => setIsAutoPlayModalOpen(false)}
         onSelectSpeed={handleAutoPlaySpeedSelect}
         onStop={handleAutoPlayStop}
+      />
+
+      <DialogueLogModal
+        isOpen={isDialogueLogModalOpen}
+        onClose={() => setIsDialogueLogModalOpen(false)}
+        dialogueLog={dialogueLog}
       />
     </Container>
   );

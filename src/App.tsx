@@ -19,13 +19,10 @@ function App() {
         <Route path="/" element={<MainPage />} />
         <Route path="/Quest" element={<QuestionPage />} />
         <Route path="/Settings" element={<Settings />} />
-        <Route path="/LoadGame" element={<LoadGame/>} />
-        <Route path="/StartGame" element={<GamePage  />} />
+        <Route path="/StartGame" element={<GamePage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/Game" element={<GamePage />} />
-        <Route path="/Settings" element={<Settings onNavigate={handleNavigate} />} />
-        <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} />} />
       </Routes>
     </Router>
   );

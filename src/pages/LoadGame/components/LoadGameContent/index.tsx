@@ -5,7 +5,16 @@ import {
   SaveSlotsGrid,
   QuickSaveInfo,
 } from './styled';
-import { SaveSlotData } from '../../index'; 
+// import { SaveSlotData } from '../../index';
+
+// 임시 타입 정의
+interface SaveSlotData {
+  slotNumber: number;
+  title?: string;
+  timestamp?: string;
+  isEmpty?: boolean;
+  saveId?: string;
+}
 
 interface LoadGameContentProps {
   saveSlots: SaveSlotData[];

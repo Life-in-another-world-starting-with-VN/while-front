@@ -5,6 +5,8 @@ import type { PageType } from './types/navigation';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import QuestionPage from "./pages/QuestionPage";
 import MainPage from "./pages/MainPage";
+import GamePage from "./pages/GamePage";
+import { GlobalStyles } from './styles';
 
 
 function App() {
@@ -30,6 +32,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/Quest" element={<QuestionPage />} />
+        <Route path="/Game" element={<GamePage />} />
         <Route path="/Settings" element={<Settings onNavigate={handleNavigate} />} />
         <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} />} />
       </Routes>

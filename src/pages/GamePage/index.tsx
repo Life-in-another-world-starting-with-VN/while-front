@@ -11,6 +11,8 @@ import {
 import DialogueBox from './components/DialogueBox';
 import GameMenu from './components/GameMenu';
 import ChoiceButtons from './components/ChoiceButtons';
+import AutoPlayModal from './components/AutoPlayModal';
+import CharacterSprite from './components/CharacterSprite';
 
 interface GamePageProps {
   backgroundImage?: string;
@@ -64,6 +66,7 @@ const PinkBlurOverlay = styled.div`
 
 const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   const [gameState, setGameState] = useState<GameState>(mockInitialGameState);
+  const [isAutoPlayModalOpen, setIsAutoPlayModalOpen] = useState(false);
 
   // 현재 씬과 대사 가져오기
   const currentScene = mockScenes[gameState.currentSceneId];
@@ -113,6 +116,23 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
     }
   };
 
+  // 자동 진행 속도 선택
+  const handleAutoPlaySpeedSelect = (speed: number) => {
+    setGameState(prev => ({
+      ...prev,
+      isAutoPlay: true,
+      autoPlaySpeed: speed,
+    }));
+  };
+
+  // 자동 진행 끄기
+  const handleAutoPlayStop = () => {
+    setGameState(prev => ({
+      ...prev,
+      isAutoPlay: false,
+    }));
+  };
+
   // 메뉴 액션 처리
   const handleMenuAction = (action: MenuAction) => {
     switch (action) {
@@ -124,12 +144,12 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
         handleNextDialogue();
         break;
       case 'auto':
-        setGameState(prev => ({ ...prev, isAutoPlay: !prev.isAutoPlay }));
-        console.log('자동 진행:', !gameState.isAutoPlay);
+        // 자동 진행 모달 열기
+        setIsAutoPlayModalOpen(true);
         break;
       case 'quickAuto':
-        console.log('빠른 자동 진행');
-        // TODO: 빠른 자동 진행 구현
+        // 빠른 자동 진행도 모달로 통합
+        setIsAutoPlayModalOpen(true);
         break;
       default:
         break;
@@ -157,6 +177,14 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
         <ClickableOverlay onClick={handleNextDialogue} />
       )}
 
+      {/* 캐릭터 스프라이트 */}
+      {currentCharacter && currentCharacter.sprite && (
+        <CharacterSprite
+          sprite={currentCharacter.sprite}
+          characterName={currentCharacter.displayName}
+        />
+      )}
+
       {currentCharacter && currentDialogue && (
         <DialogueBox
           characterName={currentCharacter.displayName}
@@ -174,6 +202,14 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
       )}
 
       <GameMenu menuItems={mockMenuItems} onMenuClick={handleMenuAction} />
+
+      <AutoPlayModal
+        isOpen={isAutoPlayModalOpen}
+        isAutoPlaying={gameState.isAutoPlay}
+        onClose={() => setIsAutoPlayModalOpen(false)}
+        onSelectSpeed={handleAutoPlaySpeedSelect}
+        onStop={handleAutoPlayStop}
+      />
     </Container>
   );
 };

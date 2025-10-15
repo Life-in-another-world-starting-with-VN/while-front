@@ -1,4 +1,7 @@
 import type { Character, Scene, MenuItem } from '../../../types/game';
+import char1 from '../../../assets/MainCharacter/char1.png';
+import char2 from '../../../assets/MainCharacter/char2.png';
+import char3 from '../../../assets/MainCharacter/char3.png';
 
 // 캐릭터 목 데이터
 export const mockCharacters: Record<string, Character> = {
@@ -7,18 +10,28 @@ export const mockCharacters: Record<string, Character> = {
     name: 'unknown',
     displayName: '???',
     color: '#fca1c7', // theme.colors.main
+    sprite: char1,
   },
   protagonist: {
     id: 'protagonist',
     name: 'protagonist',
     displayName: '주인공',
     color: '#ffffff',
+    sprite: char2,
   },
   friend: {
     id: 'friend',
     name: 'friend',
     displayName: '친구',
     color: '#fcbec2', // theme.colors.sub2
+    sprite: char3,
+  },
+  narrator: {
+    id: 'narrator',
+    name: 'narrator',
+    displayName: '나레이터',
+    color: '#ffffff',
+    // sprite 없음 - 캐릭터 이미지 표시 안됨
   },
 };
 
@@ -47,18 +60,24 @@ export const mockScenes: Record<string, Scene> = {
     choices: [
       {
         id: 'choice_1',
-        text: '주변을 둘러본다',
+        text: '주변을 둘러본다 (캐릭터 있음)',
         nextSceneId: 'scene_1',
       },
       {
         id: 'choice_2',
-        text: '일어서려고 시도한다',
+        text: '일어서려고 시도한다 (캐릭터 있음)',
         nextSceneId: 'scene_2',
+      },
+      {
+        id: 'choice_3',
+        text: '내레이션만 (캐릭터 없음)',
+        nextSceneId: 'scene_narration',
       },
     ],
   },
   scene_1: {
     id: 'scene_1',
+    backgroundImage: 'https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileImageView.do?wrtSn=11288686&filePath=L2Rpc2sxL25ld2RhdGEvMjAxNS8wMi9DTFM2OS9OVVJJXzAwMV8wMTcyX251cmltZWRpYV8yMDE1MTIwMw==&thumbAt=Y&thumbSe=b_tbumb&wrtTy=10006', // 배경 1
     dialogues: [
       {
         id: 'scene1_1',
@@ -76,10 +95,11 @@ export const mockScenes: Record<string, Scene> = {
         text: '너는...?',
       },
     ],
-    nextSceneId: 'intro', // 루프 (실제로는 다른 씬으로)
+    nextSceneId: 'scene_2',
   },
   scene_2: {
     id: 'scene_2',
+    backgroundImage: 'https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileImageView.do?wrtSn=11288686&filePath=L2Rpc2sxL25ld2RhdGEvMjAxNS8wMi9DTFM2OS9OVVJJXzAwMV8wMTcyX251cmltZWRpYV8yMDE1MTIwMw==&thumbAt=Y&thumbSe=b_tbumb&wrtTy=10006', // 배경 2
     dialogues: [
       {
         id: 'scene2_1',
@@ -97,7 +117,67 @@ export const mockScenes: Record<string, Scene> = {
         text: '무리하지 마!',
       },
     ],
-    nextSceneId: 'scene_1',
+    choices: [
+      {
+        id: 'choice_continue',
+        text: '계속하기',
+        nextSceneId: 'scene_narration',
+      },
+      {
+        id: 'choice_restart',
+        text: '처음으로',
+        nextSceneId: 'intro',
+      },
+    ],
+  },
+  scene_narration: {
+    id: 'scene_narration',
+    backgroundImage: 'https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileImageView.do?wrtSn=11288686&filePath=L2Rpc2sxL25ld2RhdGEvMjAxNS8wMi9DTFM2OS9OVVJJXzAwMV8wMTcyX251cmltZWRpYV8yMDE1MTIwMw==&thumbAt=Y&thumbSe=b_tbumb&wrtTy=10006',
+    dialogues: [
+      {
+        id: 'narration_1',
+        characterId: 'narrator',
+        text: '이것은 내레이션입니다. 캐릭터 이미지가 표시되지 않습니다.',
+      },
+      {
+        id: 'narration_2',
+        characterId: 'narrator',
+        text: '배경과 대사창만 표시되는 장면입니다.',
+      },
+      {
+        id: 'narration_3',
+        characterId: 'narrator',
+        text: '자동 진행 테스트도 가능합니다.',
+      },
+    ],
+    nextSceneId: 'scene_mixed',
+  },
+  scene_mixed: {
+    id: 'scene_mixed',
+    backgroundImage: 'https://gongu.copyright.or.kr/gongu/wrt/cmmn/wrtFileImageView.do?wrtSn=11288686&filePath=L2Rpc2sxL25ld2RhdGEvMjAxNS8wMi9DTFM2OS9OVVJJXzAwMV8wMTcyX251cmltZWRpYV8yMDE1MTIwMw==&thumbAt=Y&thumbSe=b_tbumb&wrtTy=10006',
+    dialogues: [
+      {
+        id: 'mixed_1',
+        characterId: 'narrator',
+        text: '내레이션과 캐릭터가 섞인 장면입니다.',
+      },
+      {
+        id: 'mixed_2',
+        characterId: 'protagonist',
+        text: '이제 캐릭터가 등장합니다!',
+      },
+      {
+        id: 'mixed_3',
+        characterId: 'friend',
+        text: '다른 캐릭터로 전환!',
+      },
+      {
+        id: 'mixed_4',
+        characterId: 'narrator',
+        text: '그리고 다시 내레이션으로...',
+      },
+    ],
+    nextSceneId: 'intro',
   },
 };
 
@@ -106,8 +186,6 @@ export const mockMenuItems: MenuItem[] = [
   { id: 'dialogueLog', label: '대사록' },
   { id: 'skip', label: '넘기기' },
   { id: 'auto', label: '자동진행' },
-  { id: 'auto', label: '자동진행' }, // 중복 (디자인 요구사항)
-  { id: 'quickAuto', label: 'Q.자동진행' },
   { id: 'quickLoad', label: 'Q.불러오기' },
   { id: 'settings', label: '설정' },
 ];

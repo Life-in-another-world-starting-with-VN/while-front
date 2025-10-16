@@ -167,7 +167,7 @@ function LoginPage() {
         client_secret: "",
       });
 
-      const response = await fetch("http://35.216.19.71:8000/api/v1/auth/auth/login", {
+      const response = await fetch("http://35.216.19.71:8000/api/v1/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

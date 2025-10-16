@@ -2,8 +2,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { GlobalStyles } from "./styles/globalStyles";
-import QuestionPage from "./pages/QuestionPage";
 import MainPage from "./pages/MainPage";
+import QuestionPage from "./pages/QuestionPage";
+import EmotionPage from "./pages/EmotionPage";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/Quest" element={<QuestionPage />} />
+        <Route path="/emotion" element={<EmotionPage />} />
       </Routes>
     </Router>
   );

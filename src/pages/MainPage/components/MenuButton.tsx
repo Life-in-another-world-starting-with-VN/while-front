@@ -15,6 +15,7 @@ const MenuButton = styled.button`
   align-items: center;
   justify-content: flex-start;
   gap: 12px; 
+  text-decoration: none;
 
   &:hover {
     background: #b0d8ff;

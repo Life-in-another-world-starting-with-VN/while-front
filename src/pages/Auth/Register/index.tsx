@@ -155,7 +155,7 @@ function RegisterPage() {
     setFeedback(null);
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://35.216.19.71:8000/api/v1/auth/auth/register", {
+      const response = await fetch("http://35.216.19.71:8000/api/v1/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

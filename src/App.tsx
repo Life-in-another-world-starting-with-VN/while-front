@@ -46,7 +46,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<MainPage />} />
       <Route path="/Quest" element={<QuestionPage />} />
       <Route path="/Settings" element={<Settings onNavigate={handleNavigate} />} />
-      <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} userId="exampleUser" />} />
+      <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} />} />
       <Route path="/StartGame" element={<GamePage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />

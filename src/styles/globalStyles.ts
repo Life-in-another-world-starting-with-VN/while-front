@@ -27,6 +27,16 @@ export const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* 드래그 및 텍스트 선택 방지 */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    /* 드래그 방지 */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
   }
 
   html, body {
@@ -80,9 +90,24 @@ export const GlobalStyles = createGlobalStyle`
     background: ${theme.colors.main};
   }
 
-  /* 선택 텍스트 색상 */
+  /* 선택 텍스트 비활성화 */
   ::selection {
-    background-color: ${theme.colors.main};
-    color: ${theme.colors.white};
+    background-color: transparent;
+    color: inherit;
+  }
+
+  ::-moz-selection {
+    background-color: transparent;
+    color: inherit;
+  }
+
+  /* 이미지 드래그 방지 */
+  img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
   }
 `;

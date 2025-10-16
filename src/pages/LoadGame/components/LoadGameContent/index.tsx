@@ -7,8 +7,6 @@ import {
 } from './styled';
 import type { SaveSlotData } from '../../index';
 
-
-
 interface LoadGameContentProps {
   saveSlots: SaveSlotData[];
   onSlotClick: (slotNumber: number, saveId?: string) => void;

@@ -37,6 +37,7 @@ export const typography = {
 
   weights: {
     regular: 400,
+    medium: 500,
   },
 
   lineHeight: {

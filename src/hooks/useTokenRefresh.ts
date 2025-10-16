@@ -12,7 +12,7 @@ type RefreshState = {
   error: string | null;
 };
 
-const REFRESH_ENDPOINT = "http://35.216.19.71:8000/api/v1/auth/auth/refresh";
+const REFRESH_ENDPOINT = "http://35.216.19.71:8000/api/v1/auth/refresh";
 const REFRESH_STORAGE_KEY = "refresh_token";
 
 export function useTokenRefresh() {

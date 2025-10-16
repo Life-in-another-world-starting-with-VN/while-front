@@ -5,7 +5,9 @@ import {
   SaveSlotsGrid,
   QuickSaveInfo,
 } from './styled';
-import { SaveSlotData } from '../../index'; 
+import type { SaveSlotData } from '../../index';
+
+
 
 interface LoadGameContentProps {
   saveSlots: SaveSlotData[];
@@ -32,9 +34,7 @@ const LoadGameContent: React.FC<LoadGameContentProps> = ({
         ))}
       </SaveSlotsGrid>
 
-      <QuickSaveInfo>
-        ( 자동 퀵 1 2 3 4 5 6 7 8 9 )
-      </QuickSaveInfo>
+
     </RightSection>
   );
 };

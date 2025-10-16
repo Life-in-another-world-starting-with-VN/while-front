@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { theme } from '../../../../styles';
 
 export const SaveSlotContainer = styled.div`
-  width: 24.3125rem;
+  width: 19rem;
   height: 18.25rem;
   background: ${theme.colors.gradient.primary};
   border-radius: 6.875rem;

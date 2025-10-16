@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth, type AuthUser } from "../../../store/AuthContext";
 
 type FormData = {
   username: string;
@@ -146,6 +147,8 @@ function LoginPage() {
   const [formData, setFormData] = useState<FormData>({ username: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -198,9 +201,8 @@ function LoginPage() {
       }
 
       const loginPayload = payload as Partial<LoginSuccess>;
-      if (typeof loginPayload.refresh_token === "string" && loginPayload.refresh_token.length > 0) {
-        localStorage.setItem("refresh_token", loginPayload.refresh_token);
-      } else {
+
+      if (typeof loginPayload.refresh_token !== "string" || loginPayload.refresh_token.length === 0) {
         setFeedback({
           type: "error",
           text: "서버에서 리프레시 토큰을 받지 못했습니다. 다시 시도해 주세요.",
@@ -208,8 +210,21 @@ function LoginPage() {
         return;
       }
 
+      const normalizedUser =
+        loginPayload.user && typeof loginPayload.user === "object" ? (loginPayload.user as AuthUser) : null;
+
+      login({
+        refreshToken: loginPayload.refresh_token,
+        accessToken:
+          typeof loginPayload.access_token === "string" && loginPayload.access_token.length > 0
+            ? loginPayload.access_token
+            : null,
+        user: normalizedUser,
+      });
+
       setFeedback({ type: "success", text: "로그인에 성공했습니다!" });
       setFormData({ username: "", password: "" });
+      navigate("/", { replace: true });
     } catch (error) {
       setFeedback({
         type: "error",

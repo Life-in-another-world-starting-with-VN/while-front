@@ -9,6 +9,7 @@ import GamePage from "./pages/GamePage";
 import { GlobalStyles } from './styles';
 import React from 'react';
 import { AuthProvider, useAuth } from './store/AuthContext';
+import EmotionPage from "./pages/EmotionPage";
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { isAuthenticated, isInitializing } = useAuth();
@@ -88,6 +89,7 @@ const AppRoutes: React.FC = () => {
       />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/emotion-test" element={<EmotionPage />} />
       <Route
         path="/Game"
         element={

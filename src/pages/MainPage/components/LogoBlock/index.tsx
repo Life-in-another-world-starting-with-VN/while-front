@@ -1,17 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import logo from '../../../assets/Logo.png';
+import logo from '../../../../assets/logo.png';
+import { LogoContainer, LogoImage } from './styled';
 
-const LogoContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-`;
 
-const LogoImage = styled.img`
-  width: 120px;
-`;
+
 
 const LogoBlock: React.FC = () => {
   return (

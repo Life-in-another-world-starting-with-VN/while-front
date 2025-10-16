@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Settings from './pages/Settings';
 import LoadGame from './pages/LoadGame';
 import QuestionPage from "./pages/QuestionPage";
@@ -8,13 +8,30 @@ import MainPage from "./pages/MainPage";
 import GamePage from "./pages/GamePage";
 import { GlobalStyles } from './styles';
 import React from 'react';
+import { AuthProvider, useAuth } from './store/AuthContext';
+
+const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const { isAuthenticated, isInitializing } = useAuth();
+
+  if (isInitializing) {
+    return null;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <GlobalStyles />
-      <AppRoutes />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <GlobalStyles />
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
   );
 };
 
@@ -45,12 +62,40 @@ const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/" element={<MainPage />} />
       <Route path="/Quest" element={<QuestionPage />} />
-      <Route path="/Settings" element={<Settings onNavigate={handleNavigate} />} />
-      <Route path="/LoadGame" element={<LoadGame onNavigate={handleNavigate} />} />
-      <Route path="/StartGame" element={<GamePage />} />
+      <Route
+        path="/Settings"
+        element={
+          <ProtectedRoute>
+            <Settings onNavigate={handleNavigate} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/LoadGame"
+        element={
+          <ProtectedRoute>
+            <LoadGame onNavigate={handleNavigate} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/StartGame"
+        element={
+          <ProtectedRoute>
+            <GamePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/Game" element={<GamePage />} />
+      <Route
+        path="/Game"
+        element={
+          <ProtectedRoute>
+            <GamePage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };

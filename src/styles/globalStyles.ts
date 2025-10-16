@@ -1,5 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 import { theme } from './theme';
+import PretendardRegular from '../assets/fonts/Pretendard-Regular.woff2';
+import PretendardMedium from '../assets/fonts/Pretendard-Medium.woff2';
 
 export const GlobalStyles = createGlobalStyle`
   @font-face {
@@ -11,14 +13,14 @@ export const GlobalStyles = createGlobalStyle`
 
   @font-face {
     font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/Pretendard-Regular.woff2') format('woff2');
+    src: url(${PretendardRegular}) format('woff2');
     font-weight: 400;
     font-display: swap;
   }
 
   @font-face {
     font-family: 'Pretendard';
-    src: url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/Pretendard-Medium.woff2') format('woff2');
+    src: url(${PretendardMedium}) format('woff2');
     font-weight: 500;
     font-display: swap;
   }

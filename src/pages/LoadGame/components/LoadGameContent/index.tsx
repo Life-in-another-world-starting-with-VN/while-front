@@ -3,7 +3,6 @@ import SaveSlot from '../SaveSlot';
 import {
   RightSection,
   SaveSlotsGrid,
-  QuickSaveInfo,
 } from './styled';
 import type { SaveSlotData } from '../../index';
 

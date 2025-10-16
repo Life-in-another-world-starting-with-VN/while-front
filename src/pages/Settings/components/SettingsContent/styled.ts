@@ -7,6 +7,7 @@ export const RightSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 3rem;
+  position: relative;
 
   @media (max-width: 768px) {
     padding: 1.5rem 2rem;

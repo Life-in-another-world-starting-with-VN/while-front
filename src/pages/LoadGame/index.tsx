@@ -106,7 +106,7 @@ const LoadGame: React.FC<LoadGameProps> = ({ onNavigate }) => {
         const data = response.data;
 
         const formattedSlots: SaveSlotData[] = data
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
           .slice(0, 6)
           .map((save, index) => ({
             slotNumber: index + 1,

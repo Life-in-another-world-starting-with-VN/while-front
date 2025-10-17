@@ -25,7 +25,7 @@ interface AuthContextValue {
   refreshAccessToken: () => Promise<{ accessToken: string; userId?: string; user?: AuthUser | null }>;
 }
 
-const API_BASE_URL = 'http://api.mieung.kr';
+const API_BASE_URL = 'https://api.mieung.kr';
 const REFRESH_ENDPOINT = `${API_BASE_URL}/api/v1/auth/refresh`;
 const REFRESH_STORAGE_KEY = 'refresh_token';
 

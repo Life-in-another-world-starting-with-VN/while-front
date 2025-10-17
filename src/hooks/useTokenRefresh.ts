@@ -12,7 +12,7 @@ type RefreshState = {
   error: string | null;
 };
 
-const REFRESH_ENDPOINT = "http://api.mieung.kr/api/v1/auth/refresh";
+const REFRESH_ENDPOINT = "https://api.mieung.kr/api/v1/auth/refresh";
 const REFRESH_STORAGE_KEY = "refresh_token";
 
 export function useTokenRefresh() {

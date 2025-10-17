@@ -57,9 +57,7 @@ function MainPage() {
         </MenuButton>
       </Sidebar>
       <Content>
-        <Character src={char1} alt="character1" />
-        <Character src={char2} alt="character2" />
-        <Character src={char3} alt="character3" />
+        
       </Content>
       <ExitModal
         isOpen={isLogoutModalOpen}

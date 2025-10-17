@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar';
 import LogoBlock from './components/LogoBlock';
 import MenuButton from './components/MenuButton';
 import Icon from './components/Icon';
-import { Content, Character } from './components/CharacterDisplay';
+import { Content, BackgroundImage } from './components/CharacterDisplay';
 import Play from '../../assets/MainBtnicon/play.svg';
 import Cell from '../../assets/MainBtnicon/cell.svg';
 import Option from '../../assets/MainBtnicon/option.svg';
@@ -12,6 +12,7 @@ import Exit from '../../assets/MainBtnicon/exit.svg';
 import char1 from '../../assets/MainCharacter/char1.png';
 import char2 from '../../assets/MainCharacter/char2.png';
 import char3 from '../../assets/MainCharacter/char3.png';
+import startBg from '../../assets/start-bg.png';
 import { PageContainer } from './styled';
 import ExitModal from './components/ExitModal';
 import { useAuth } from '../../store/AuthContext';
@@ -57,7 +58,7 @@ function MainPage() {
         </MenuButton>
       </Sidebar>
       <Content>
-        
+        <BackgroundImage src={startBg} alt="게임 시작 배경" />
       </Content>
       <ExitModal
         isOpen={isLogoutModalOpen}

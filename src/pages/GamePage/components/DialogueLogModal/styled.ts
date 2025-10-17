@@ -129,7 +129,7 @@ export const LogItem = styled.div`
 export const CharacterName = styled.div<{ color?: string }>`
   color: ${props => props.color || theme.colors.main};
   font-size: ${theme.typography.sizes.subOption};
-  font-weight: ${theme.typography.weights.medium};
+  font-weight: ${theme.typography.weights.regular};
   text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
 
   ${theme.media.mobile} {

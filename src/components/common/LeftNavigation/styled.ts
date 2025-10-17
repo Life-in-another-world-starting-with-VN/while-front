@@ -51,9 +51,10 @@ export const MenuList = styled.ul`
   }
 `;
 
-export const MenuItem = styled.li<{ isActive?: boolean }>`
+export const MenuItem = styled.li<{ $isActive?: boolean }>`
   font-size: 2.5rem;
-  color: ${props => props.isActive ? theme.colors.text : theme.colors.unselected};
+  color: ${({ $isActive }) => 
+    $isActive ? theme.colors.text : theme.colors.unselected};
   cursor: pointer;
   font-weight: ${theme.typography.weights.regular};
   line-height: ${theme.typography.lineHeight.normal};
@@ -66,6 +67,7 @@ export const MenuItem = styled.li<{ isActive?: boolean }>`
     color: ${theme.colors.text};
   }
 `;
+
 
 export const Divider = styled.div`
   position: absolute;

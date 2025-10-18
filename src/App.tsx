@@ -10,6 +10,7 @@ import { GlobalStyles } from './styles';
 import React from 'react';
 import { AuthProvider, useAuth } from './store/AuthContext';
 import EmotionPage from "./pages/EmotionPage";
+import SavePage from "./pages/SavePage";
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { isAuthenticated, isInitializing } = useAuth();
@@ -51,6 +52,9 @@ const AppRoutes: React.FC = () => {
       case 'loadGame':
         navigate('/LoadGame');
         break;
+      case 'saveGame':
+        navigate('/SavePage');
+      break;
       case 'game':
         navigate('/Game');
         break;
@@ -76,6 +80,14 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <LoadGame onNavigate={handleNavigate} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/SavePage"
+        element={
+          <ProtectedRoute>
+            <SavePage onNavigate={handleNavigate} />
           </ProtectedRoute>
         }
       />

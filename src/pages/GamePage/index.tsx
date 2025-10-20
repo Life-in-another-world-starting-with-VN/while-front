@@ -107,6 +107,12 @@ const Label = styled.label`
   color: #4a5568;
 `;
 
+const InputHint = styled.div`
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #718096;
+`;
+
 const Input = styled.input`
   width: 100%;
   padding: 0.75rem 1rem;
@@ -194,6 +200,33 @@ const GameItemInfo = styled.div`
   color: #718096;
 `;
 
+const BackButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: #718096;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 1rem;
+  width: 100%;
+
+  &:hover {
+    background: #4a5568;
+  }
+
+  &:active {
+    transform: translateY(2px);
+  }
+
+  &:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+  }
+`;
+
 const ErrorMessage = styled.div`
   padding: 1rem;
   background: #fed7d7;
@@ -201,6 +234,121 @@ const ErrorMessage = styled.div`
   border-radius: 12px;
   margin-bottom: 1rem;
   text-align: center;
+`;
+
+const LoadingOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+`;
+
+const LoadingSpinner = styled.div`
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const LoadingText = styled.div`
+  margin-top: 1.5rem;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+`;
+
+const LoadingSubtext = styled.div`
+  margin-top: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+`;
+
+const ConfirmModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+`;
+
+const ConfirmCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+`;
+
+const ConfirmTitle = styled.h2`
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: #1a202c;
+  text-align: center;
+`;
+
+const ConfirmMessage = styled.p`
+  margin: 0 0 2rem 0;
+  color: #4a5568;
+  text-align: center;
+  line-height: 1.6;
+`;
+
+const ConfirmButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+const ConfirmButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
+  flex: 1;
+  padding: 0.875rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  ${props =>
+    props.variant === 'primary'
+      ? `
+    background: #667eea;
+    color: white;
+    &:hover {
+      background: #5a67d8;
+    }
+  `
+      : `
+    background: #e2e8f0;
+    color: #4a5568;
+    &:hover {
+      background: #cbd5e0;
+    }
+  `}
+
+  &:active {
+    transform: translateY(2px);
+  }
 `;
 
 const ClickableOverlay = styled.div`
@@ -260,8 +408,11 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   const [gameForm, setGameForm] = useState<GameCreateRequest>({
     personality: '',
     genre: '',
-    playtime: 60,
+    playtime: 30, // 기본값 30분
   });
+  const [isCreatingGame, setIsCreatingGame] = useState(false);
+  const [showStartConfirm, setShowStartConfirm] = useState(false);
+  const [createdGameId, setCreatedGameId] = useState<string | null>(null);
 
   // Current game state
   const [currentGame, setCurrentGame] = useState<GameDetailResponse | null>(null);
@@ -337,15 +488,53 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   const handleCreateGame = async () => {
     try {
       setError(null);
+
+      // 유효성 검사
+      if (!gameForm.personality.trim()) {
+        setError('성격 유형을 입력해주세요.');
+        return;
+      }
+      if (!gameForm.genre.trim()) {
+        setError('장르를 입력해주세요.');
+        return;
+      }
+      if (gameForm.playtime < 5 || gameForm.playtime > 100) {
+        setError('플레이 시간은 5분에서 100분 사이로 설정해주세요.');
+        return;
+      }
+
+      setIsCreatingGame(true);
       const token = await getToken();
       const newGame = await createGame(gameForm, token);
-      const gameDetail = await getGame(newGame.id, token);
-      setCurrentGame(gameDetail);
-      await loadGameState(newGame.id, token);
-      setMode('playing');
+      setCreatedGameId(newGame.id);
+      setIsCreatingGame(false);
+      setShowStartConfirm(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : '게임 생성에 실패했습니다.');
+      setIsCreatingGame(false);
     }
+  };
+
+  // Start created game
+  const handleStartCreatedGame = async () => {
+    if (!createdGameId) return;
+    try {
+      setShowStartConfirm(false);
+      const token = await getToken();
+      const gameDetail = await getGame(createdGameId, token);
+      setCurrentGame(gameDetail);
+      await loadGameState(createdGameId, token);
+      setMode('playing');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '게임을 시작하는데 실패했습니다.');
+    }
+  };
+
+  // Cancel starting game
+  const handleCancelStart = () => {
+    setShowStartConfirm(false);
+    setCreatedGameId(null);
+    setMode('select');
   };
 
   // Select existing game
@@ -465,6 +654,7 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
             ))}
           </GameSelectList>
           <Button onClick={() => setMode('create')}>새 게임 만들기</Button>
+          <BackButton onClick={() => window.history.back()}>뒤로가기</BackButton>
         </SetupCard>
       </GameSetupScreen>
     );
@@ -472,51 +662,96 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
 
   if (mode === 'create') {
     return (
-      <GameSetupScreen>
-        <SetupCard>
-          <SetupTitle>새 게임 만들기</SetupTitle>
-          {error && <ErrorMessage>{error}</ErrorMessage>}
-          <FormField>
-            <Label>성격 유형</Label>
-            <Input
-              type="text"
-              placeholder="예: 순수, 츤데레, 활발함, 차가움 등"
-              value={gameForm.personality}
-              onChange={e => setGameForm({ ...gameForm, personality: e.target.value })}
-              required
-            />
-          </FormField>
-          <FormField>
-            <Label>장르</Label>
-            <Input
-              type="text"
-              placeholder="예: 로맨스, 판타지, 학원물, 현대물 등"
-              value={gameForm.genre}
-              onChange={e => setGameForm({ ...gameForm, genre: e.target.value })}
-              required
-            />
-          </FormField>
-          <FormField>
-            <Label>예상 플레이 시간 (분)</Label>
-            <Input
-              type="number"
-              min="10"
-              max="300"
-              value={gameForm.playtime}
-              onChange={e => setGameForm({ ...gameForm, playtime: parseInt(e.target.value) })}
-            />
-          </FormField>
-          <Button onClick={handleCreateGame}>게임 생성하기</Button>
-          {availableGames.length > 0 && (
-            <Button
-              onClick={() => setMode('select')}
-              style={{ marginTop: '1rem', background: '#718096' }}
-            >
-              기존 게임 선택
+      <>
+        <GameSetupScreen>
+          <SetupCard>
+            <SetupTitle>새 게임 만들기</SetupTitle>
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+            <FormField>
+              <Label>성격 유형</Label>
+              <Input
+                type="text"
+                placeholder="예: 순수, 츤데레, 활발함, 차가움 등"
+                value={gameForm.personality}
+                onChange={e => setGameForm({ ...gameForm, personality: e.target.value })}
+                required
+                disabled={isCreatingGame}
+              />
+            </FormField>
+            <FormField>
+              <Label>장르</Label>
+              <Input
+                type="text"
+                placeholder="예: 로맨스, 판타지, 학원물, 현대물 등"
+                value={gameForm.genre}
+                onChange={e => setGameForm({ ...gameForm, genre: e.target.value })}
+                required
+                disabled={isCreatingGame}
+              />
+            </FormField>
+            <FormField>
+              <Label>예상 플레이 시간 (분)</Label>
+              <Input
+                type="number"
+                min="5"
+                max="100"
+                value={gameForm.playtime}
+                onChange={e => setGameForm({ ...gameForm, playtime: parseInt(e.target.value) || 5 })}
+                disabled={isCreatingGame}
+              />
+              <InputHint>최소 5분 ~ 최대 100분 (권장: 30~60분)</InputHint>
+            </FormField>
+            <Button onClick={handleCreateGame} disabled={isCreatingGame}>
+              {isCreatingGame ? '생성 중...' : '게임 생성하기'}
             </Button>
-          )}
-        </SetupCard>
-      </GameSetupScreen>
+            {availableGames.length > 0 && (
+              <Button
+                onClick={() => setMode('select')}
+                style={{ marginTop: '1rem', background: '#718096' }}
+                disabled={isCreatingGame}
+              >
+                기존 게임 선택
+              </Button>
+            )}
+            <BackButton onClick={() => window.history.back()} disabled={isCreatingGame}>
+              뒤로가기
+            </BackButton>
+          </SetupCard>
+        </GameSetupScreen>
+
+        {/* 로딩 오버레이 */}
+        {isCreatingGame && (
+          <LoadingOverlay>
+            <LoadingSpinner />
+            <LoadingText>AI가 게임을 생성하고 있습니다...</LoadingText>
+            <LoadingSubtext>
+              {gameForm.playtime}분 분량의 스토리를 작성 중입니다. 잠시만 기다려주세요.
+            </LoadingSubtext>
+          </LoadingOverlay>
+        )}
+
+        {/* 시작 확인 모달 */}
+        {showStartConfirm && (
+          <ConfirmModal>
+            <ConfirmCard>
+              <ConfirmTitle>🎉 게임 생성 완료!</ConfirmTitle>
+              <ConfirmMessage>
+                게임이 성공적으로 생성되었습니다.
+                <br />
+                바로 시작하시겠습니까?
+              </ConfirmMessage>
+              <ConfirmButtons>
+                <ConfirmButton variant="secondary" onClick={handleCancelStart}>
+                  나중에
+                </ConfirmButton>
+                <ConfirmButton variant="primary" onClick={handleStartCreatedGame}>
+                  시작하기
+                </ConfirmButton>
+              </ConfirmButtons>
+            </ConfirmCard>
+          </ConfirmModal>
+        )}
+      </>
     );
   }
 

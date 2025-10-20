@@ -34,14 +34,23 @@ export const CharacterName = styled.div<{ color?: string }>`
   font-family: ${theme.typography.fontFamily};
   font-weight: ${theme.typography.weights.regular};
   line-height: normal;
-  text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
+  -webkit-text-stroke: 2px black;
+  paint-order: stroke fill;
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 
   ${theme.media.tablet} {
     font-size: ${theme.typography.sizes.subOption};
+    -webkit-text-stroke: 1.5px black;
   }
 
   ${theme.media.mobile} {
     font-size: ${theme.typography.sizes.button};
+    -webkit-text-stroke: 1px black;
   }
 `;
 
@@ -52,14 +61,23 @@ export const DialogueText = styled.div`
   font-weight: ${theme.typography.weights.regular};
   line-height: 1.4;
   word-wrap: break-word;
-  text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
+  -webkit-text-stroke: 2px black;
+  paint-order: stroke fill;
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 
   ${theme.media.tablet} {
     font-size: ${theme.typography.sizes.subOption};
+    -webkit-text-stroke: 1.5px black;
   }
 
   ${theme.media.mobile} {
     font-size: ${theme.typography.sizes.button};
     line-height: 1.5;
+    -webkit-text-stroke: 1px black;
   }
 `;

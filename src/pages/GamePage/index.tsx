@@ -26,6 +26,7 @@ import CharacterSprite from './components/CharacterSprite';
 import DialogueLogModal from './components/DialogueLogModal';
 import { mockMenuItems } from './data/mockGameData';
 import type { MenuAction } from '../../types/game';
+import EmotionStatusWidget from '../../components/EmotionStatusWidget';
 
 // 캐릭터 이미지 import
 import char1 from '../../assets/MainCharacter/char1.png';
@@ -769,6 +770,7 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   return (
     <Container backgroundImage={storyState.background_url || backgroundImage}>
       <PinkBlurOverlay />
+      <EmotionStatusWidget />
 
       {!showChoices && <ClickableOverlay onClick={handleNextDialogue} />}
 

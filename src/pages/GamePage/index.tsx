@@ -75,7 +75,7 @@ const GameSetupScreen = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(180deg, #B1DEF7 0%, #E4E8EB 100%);;
   padding: 2rem;
 `;
 

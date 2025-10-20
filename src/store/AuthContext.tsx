@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { buildApiUrl } from '../config/env';
 
 export interface AuthUser {
   id?: string;
@@ -25,8 +26,7 @@ interface AuthContextValue {
   refreshAccessToken: () => Promise<{ accessToken: string; userId?: string; user?: AuthUser | null }>;
 }
 
-const API_BASE_URL = 'https://api.mieung.kr';
-const REFRESH_ENDPOINT = `${API_BASE_URL}/api/v1/auth/refresh`;
+const REFRESH_ENDPOINT = buildApiUrl('/api/v1/auth/refresh');
 const REFRESH_STORAGE_KEY = 'refresh_token';
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);

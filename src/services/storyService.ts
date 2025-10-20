@@ -4,10 +4,12 @@ import { apiRequest } from './api';
 export interface StoryState {
   scene_id: string;
   scene_title: string;
+  background_url?: string | null;  // 배경 이미지 URL
   dialogues: Array<{
     id: string;
     text_template: string;
     character_id: string | null;
+    character_name: string;
     scene_id: string;
   }>;
   available_choices: Array<{

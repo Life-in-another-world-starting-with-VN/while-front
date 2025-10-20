@@ -22,10 +22,15 @@ import DialogueBox from './components/DialogueBox';
 import GameMenu from './components/GameMenu';
 import ChoiceButtons from './components/ChoiceButtons';
 import AutoPlayModal from './components/AutoPlayModal';
-// import CharacterSprite from './components/CharacterSprite'; // Not used in current implementation
+import CharacterSprite from './components/CharacterSprite';
 import DialogueLogModal from './components/DialogueLogModal';
 import { mockMenuItems } from './data/mockGameData';
 import type { MenuAction } from '../../types/game';
+
+// 캐릭터 이미지 import
+import char1 from '../../assets/MainCharacter/char1.png';
+import char2 from '../../assets/MainCharacter/char2.png';
+import char3 from '../../assets/MainCharacter/char3.png';
 
 interface GamePageProps {
   backgroundImage?: string;
@@ -231,6 +236,14 @@ interface DialogueLogItem {
 
 type GameSetupMode = 'loading' | 'select' | 'create' | 'playing';
 
+// 캐릭터 이미지 매핑 함수
+const getCharacterImage = (characterName: string): string => {
+  // 캐릭터 이름에 따라 다른 이미지 반환
+  const nameHash = characterName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const images = [char1, char2, char3];
+  return images[nameHash % images.length];
+};
+
 const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   const { accessToken, refreshAccessToken } = useAuth();
   // const navigate = useNavigate(); // Not used in current implementation
@@ -359,7 +372,7 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
       setDialogueLog(prev => [
         ...prev,
         {
-          characterName: '캐릭터', // Can be enhanced with character data
+          characterName: currentDialogue.character_name || '캐릭터',
           text: currentDialogue.text_template,
         },
       ]);
@@ -377,6 +390,17 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
     try {
       const token = await getToken();
       const currentDialogue = storyState.dialogues[currentDialogueIndex];
+
+      // 선택한 choice 찾기
+      const selectedChoice = storyState.available_choices.find(c => c.id === choiceId);
+
+      // next_scene_id가 null이면 게임 종료
+      if (selectedChoice && !selectedChoice.next_scene_id) {
+        alert('게임이 종료되었습니다! 🎉\n다시 플레이하시려면 새로고침 해주세요.');
+        window.location.reload();
+        return;
+      }
+
       const newState = await makeChoice(currentGame.id, currentDialogue.id, choiceId, token);
       setStoryState(newState);
       setCurrentDialogueIndex(0);
@@ -501,20 +525,43 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
     return <LoadingScreen>게임을 시작하는 중...</LoadingScreen>;
   }
 
+  // Check if game has no dialogues
+  if (storyState.dialogues.length === 0) {
+    return (
+      <LoadingScreen>
+        <div>스토리 데이터가 없습니다.</div>
+        <div style={{ fontSize: '1rem', marginTop: '1rem', color: 'rgba(255,255,255,0.7)' }}>
+          게임이 아직 생성 중이거나 데이터가 준비되지 않았습니다.
+        </div>
+        <ErrorMessage style={{ marginTop: '2rem' }} onClick={() => window.location.reload()}>
+          새로고침
+        </ErrorMessage>
+      </LoadingScreen>
+    );
+  }
+
   const currentDialogue = storyState.dialogues[currentDialogueIndex];
   const showChoices =
     currentDialogueIndex === storyState.dialogues.length - 1 &&
     storyState.available_choices.length > 0;
 
   return (
-    <Container backgroundImage={backgroundImage}>
+    <Container backgroundImage={storyState.background_url || backgroundImage}>
       <PinkBlurOverlay />
 
       {!showChoices && <ClickableOverlay onClick={handleNextDialogue} />}
 
+      {/* 캐릭터 스프라이트 표시 (나레이션일 때는 숨김) */}
+      {currentDialogue && currentDialogue.character_name && currentDialogue.character_name !== "나레이션" && (
+        <CharacterSprite
+          sprite={getCharacterImage(currentDialogue.character_name)}
+          characterName={currentDialogue.character_name}
+        />
+      )}
+
       {currentDialogue && (
         <DialogueBox
-          characterName="캐릭터"
+          characterName={currentDialogue.character_name || "캐릭터"}
           text={currentDialogue.text_template}
           onClick={handleNextDialogue}
         />

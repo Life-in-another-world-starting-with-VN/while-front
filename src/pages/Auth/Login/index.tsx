@@ -170,7 +170,8 @@ function LoginPage() {
         client_secret: "",
       });
 
-      const response = await fetch("http://35.216.19.71:8000/api/v1/auth/login", {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

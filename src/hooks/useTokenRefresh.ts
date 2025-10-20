@@ -12,7 +12,8 @@ type RefreshState = {
   error: string | null;
 };
 
-const REFRESH_ENDPOINT = "http://35.216.19.71:8000/api/v1/auth/refresh";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const REFRESH_ENDPOINT = `${API_BASE_URL}/api/v1/auth/refresh`;
 const REFRESH_STORAGE_KEY = "refresh_token";
 
 export function useTokenRefresh() {

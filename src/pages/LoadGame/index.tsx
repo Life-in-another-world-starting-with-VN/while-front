@@ -5,7 +5,7 @@ import { LoadGameContainer } from './styled';
 import type { NavigationItem, PageType } from '../../types/navigation';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://35.216.19.71:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const REFRESH_ENDPOINT = `${API_BASE_URL}/api/v1/auth/refresh`;
 const REFRESH_STORAGE_KEY = "refresh_token";
 

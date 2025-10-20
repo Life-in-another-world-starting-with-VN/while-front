@@ -6,7 +6,6 @@ import MenuButton from './components/MenuButton';
 import Icon from './components/Icon';
 import { Content, BackgroundImage } from './components/CharacterDisplay';
 import Play from '../../assets/MainBtnicon/play.svg';
-import Cell from '../../assets/MainBtnicon/cell.svg';
 import Option from '../../assets/MainBtnicon/option.svg';
 import Exit from '../../assets/MainBtnicon/exit.svg';
 import startBg from '../../assets/start-bg.png';
@@ -43,9 +42,6 @@ function MainPage() {
         <LogoBlock />
         <MenuButton onClick={() => handleNavigate('/Game')}>
           <Icon src={Play} /> 게임 시작
-        </MenuButton>
-        <MenuButton onClick={() => handleNavigate('/LoadGame')}>
-          <Icon src={Cell} /> 불러오기
         </MenuButton>
         <MenuButton onClick={() => handleNavigate('/Settings')}>
           <Icon src={Option} /> 설정

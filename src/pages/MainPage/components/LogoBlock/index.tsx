@@ -1,6 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
-import logo from '../../../../assets/logo.png';
+import logo from '../../../../assets/while-logo.png';
 import { LogoContainer, LogoImage } from './styled';
 
 
@@ -10,7 +9,6 @@ const LogoBlock: React.FC = () => {
   return (
     <LogoContainer>
       <LogoImage src={logo} alt="logo" />
-      <h2>LOVE CAMPUS</h2>
     </LogoContainer>
   );
 };

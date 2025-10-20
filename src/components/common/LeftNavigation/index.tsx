@@ -24,15 +24,17 @@ const LeftNavigation: React.FC<LeftNavigationProps> = ({
     <LeftSection>
       <Title>환경설정</Title>
       <MenuList>
-        {navigationItems.map((item, index) => (
+        {navigationItems.map((item) => (
           <MenuItem
-            key={index}
-            isActive={item.isActive}
-            onClick={() => onMenuClick?.(item.pageType)}
-          >
-            {item.label}
-          </MenuItem>
+              key={item.pageType}
+              $isActive={item.isActive}
+              onClick={() => onMenuClick?.(item.pageType)}
+            >
+              {item.label}
+            </MenuItem>
+
         ))}
+
       </MenuList>
       <Divider />
       <BackButton onClick={onBackClick}>돌아가기</BackButton>

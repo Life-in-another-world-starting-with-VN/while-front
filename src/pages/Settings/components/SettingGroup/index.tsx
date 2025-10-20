@@ -4,6 +4,7 @@ import { SettingGroup, SettingTitle, OptionList, Option } from './styled';
 interface SettingOption {
   label: string;
   isActive?: boolean;
+  onClick?: () => void;
 }
 
 interface SettingGroupProps {
@@ -25,7 +26,10 @@ const SettingGroupComponent: React.FC<SettingGroupProps> = ({
           <Option
             key={index}
             isActive={option.isActive}
-            onClick={() => onOptionClick?.(index)}
+            onClick={() => {
+              option.onClick?.();
+              onOptionClick?.(index);
+            }}
           >
             {option.label}
           </Option>

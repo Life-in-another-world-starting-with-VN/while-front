@@ -5,8 +5,10 @@ export const LogoContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 12px;
-`; 
+  margin-bottom: 20%;
+`;
 
 export const LogoImage = styled.img`
   width: 120px;
+  border-radius: 60px;
 `;

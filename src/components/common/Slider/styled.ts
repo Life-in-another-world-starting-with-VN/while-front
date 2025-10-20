@@ -27,13 +27,36 @@ export const SliderTrack = styled.div`
   overflow: hidden;
 `;
 
-export const SliderThumb = styled.div<{ position?: number }>`
+export const SliderFill = styled.div`
   position: absolute;
-  width: 0.625rem;
-  height: 1.5833rem;
-  background-color: ${theme.colors.sub3};
-  border-radius: 1.25rem;
-  left: ${props => props.position ? `${props.position}%` : '70%'};
   top: 0;
+  left: 0;
+  height: 100%;
+  background: ${theme.colors.main};
+  border-radius: inherit;
+  pointer-events: none;
+`;
+
+export const SliderThumb = styled.div`
+  position: absolute;
+  top: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: ${theme.colors.sub3};
+  border: 2px solid ${theme.colors.sub3};
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
   transition: left 0.2s ease;
+  pointer-events: none;
+`;
+
+export const SliderInput = styled.input`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 `;

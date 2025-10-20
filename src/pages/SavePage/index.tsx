@@ -80,7 +80,7 @@ const SavePage: React.FC<LoadGameProps> = ({ onNavigate }) => {
   const handleMenuClick = (pageType: PageType) => onNavigate?.(pageType);
   const handleBackClick = () => console.log('뒤로가기 클릭됨');
 
-  const handleSlotClick = async (slotNumber: number, saveId?: string) => {
+  const handleSlotClick = async (slotNumber: number) => {
     try {
       const { accessToken, userId } = await refreshAccessToken();
       if (!userId) throw new Error("유저 ID를 가져올 수 없습니다.");

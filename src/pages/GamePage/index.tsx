@@ -127,21 +127,7 @@ const Input = styled.input`
   }
 `;
 
-const Select = styled.select`
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  font-size: 1rem;
-  background: white;
-  cursor: pointer;
-  transition: border-color 0.2s;
 
-  &:focus {
-    outline: none;
-    border-color: #667eea;
-  }
-`;
 
 const Button = styled.button`
   width: 100%;

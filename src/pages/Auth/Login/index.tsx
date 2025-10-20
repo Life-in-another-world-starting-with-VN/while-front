@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { buildApiUrl } from "../../../config/env";
 import { useAuth, type AuthUser } from "../../../store/AuthContext";
 
 type FormData = {
@@ -14,6 +15,8 @@ type LoginSuccess = {
   token_type: string;
   user?: Record<string, unknown>;
 };
+
+const LOGIN_ENDPOINT = buildApiUrl("/api/v1/auth/login");
 
 const PageContainer = styled.div`
   width: 100%;
@@ -170,8 +173,7 @@ function LoginPage() {
         client_secret: "",
       });
 
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      const response = await fetch(LOGIN_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

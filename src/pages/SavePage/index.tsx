@@ -4,9 +4,9 @@ import LoadGameContent from './components/LoadGameContent';
 import { LoadGameContainer } from './styled';
 import type { NavigationItem, PageType } from '../../types/navigation';
 import axios from 'axios';
+import { buildApiUrl } from '../../config/env';
 
-const API_BASE_URL = 'http://35.216.19.71:8000';
-const REFRESH_ENDPOINT = `${API_BASE_URL}/api/v1/auth/refresh`;
+const REFRESH_ENDPOINT = buildApiUrl('/api/v1/auth/refresh');
 const REFRESH_STORAGE_KEY = "refresh_token";
 
 
@@ -98,7 +98,7 @@ const SavePage: React.FC<LoadGameProps> = ({ onNavigate }) => {
       };
 
       const response = await axios.post(
-        `${API_BASE_URL}/api/v1/saves/games/${gameId}/saves`,
+        buildApiUrl(`/api/v1/saves/games/${gameId}/saves`),
         savePayload,
         {
           headers: {
@@ -124,7 +124,7 @@ const SavePage: React.FC<LoadGameProps> = ({ onNavigate }) => {
       const { accessToken, userId } = await refreshAccessToken();
       if (!userId) throw new Error("유저 ID를 가져올 수 없습니다.");
 
-      const response = await axios.get<SaveData[]>(`${API_BASE_URL}/api/v1/saves/saves`, {
+      const response = await axios.get<SaveData[]>(buildApiUrl('/api/v1/saves/saves'), {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           'user-id': userId,

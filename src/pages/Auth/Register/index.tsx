@@ -1,12 +1,15 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { buildApiUrl } from "../../../config/env";
 
 type FormData = {
   username: string;
   email: string;
   password: string;
 };
+
+const REGISTER_ENDPOINT = buildApiUrl("/api/v1/auth/register");
 
 const PageContainer = styled.div`
   width: 100%;
@@ -155,8 +158,7 @@ function RegisterPage() {
     setFeedback(null);
     setIsSubmitting(true);
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+      const response = await fetch(REGISTER_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

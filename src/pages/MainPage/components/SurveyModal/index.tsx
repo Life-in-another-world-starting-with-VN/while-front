@@ -71,10 +71,10 @@ const SurveyModal: React.FC<SurveyModalProps> = ({
   const playTimeOptions = useMemo(
     () => [
       { value: '', label: '예상 플레이 타임을 선택해주세요' },
-      { value: 'under-30', label: '30분 이하' },
-      { value: '30-60', label: '30분 ~ 1시간' },
-      { value: '60-120', label: '1시간 ~ 2시간' },
-      { value: 'over-120', label: '2시간 이상' },
+      { value: '1', label: '30분 이하' },
+      { value: '2', label: '30분 ~ 1시간' },
+      { value: '3', label: '1시간 ~ 2시간' },
+      { value: '4', label: '2시간 이상' },
     ],
     [],
   );

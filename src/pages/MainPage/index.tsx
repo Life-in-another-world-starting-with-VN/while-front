@@ -18,7 +18,7 @@ import { publishGameSurvey } from '../../api/gameSurvey';
 
 function MainPage() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, accessToken, refreshAccessToken } = useAuth();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isSurveyModalOpen, setIsSurveyModalOpen] = useState(false);
   const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
@@ -54,16 +54,45 @@ function MainPage() {
   };
 
   const handleSurveySubmit = async (values: SurveyFormValues) => {
+    const playtime = Number(values.playTime);
+    if (!Number.isFinite(playtime) || playtime <= 0) {
+      setSurveySubmissionError('예상 플레이 타임을 다시 선택해주세요.');
+      return;
+    }
+
     setIsSubmittingSurvey(true);
     setSurveySubmissionError(null);
 
     try {
-      await publishGameSurvey(values);
+      let token = accessToken;
+
+      if (!token) {
+        const refreshed = await refreshAccessToken();
+        token = refreshed.accessToken;
+      }
+
+      if (!token) {
+        throw new Error('액세스 토큰을 가져오지 못했습니다. 다시 로그인해 주세요.');
+      }
+
+      const createdGame = await publishGameSurvey(
+        {
+          personality: values.personality,
+          genre: values.genre,
+          playtime,
+        },
+        { accessToken: token },
+      );
+
       setIsSurveyModalOpen(false);
-      navigate('/Game', { state: { survey: values } });
+      navigate('/Game', { state: { survey: values, game: createdGame } });
     } catch (error) {
       console.error(error);
-      setSurveySubmissionError('조사를 전송하지 못했습니다. 잠시 후 다시 시도해주세요.');
+      setSurveySubmissionError(
+        error instanceof Error
+          ? error.message
+          : '조사를 전송하지 못했습니다. 잠시 후 다시 시도해주세요.',
+      );
     } finally {
       setIsSubmittingSurvey(false);
     }

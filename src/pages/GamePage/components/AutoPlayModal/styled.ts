@@ -82,7 +82,7 @@ export const StopButton = styled.button`
   font-family: ${theme.typography.fontFamily};
   cursor: pointer;
   transition: all 0.2s ease;
-  font-weight: ${theme.typography.weights.medium};
+  font-weight: ${theme.typography.weights.regular};
 
   &:hover {
     background: rgba(255, 59, 48, 0.3);

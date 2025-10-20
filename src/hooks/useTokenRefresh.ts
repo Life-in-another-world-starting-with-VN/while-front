@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import { buildApiUrl } from "../config/env";
 
 type RefreshResponse = {
   access_token: string;
@@ -13,7 +12,8 @@ type RefreshState = {
   error: string | null;
 };
 
-const REFRESH_ENDPOINT = buildApiUrl("/api/v1/auth/refresh");
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const REFRESH_ENDPOINT = `${API_BASE_URL}/api/v1/auth/refresh`;
 const REFRESH_STORAGE_KEY = "refresh_token";
 
 export function useTokenRefresh() {

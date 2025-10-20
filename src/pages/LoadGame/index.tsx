@@ -4,10 +4,9 @@ import LoadGameContent from './components/LoadGameContent';
 import { LoadGameContainer } from './styled';
 import type { NavigationItem, PageType } from '../../types/navigation';
 import axios from 'axios';
-import { buildApiUrl } from '../../config/env';
 
-const REFRESH_ENDPOINT = buildApiUrl('/api/v1/auth/refresh');
-const SAVES_ENDPOINT = buildApiUrl('/api/v1/saves/saves');
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const REFRESH_ENDPOINT = `${API_BASE_URL}/api/v1/auth/refresh`;
 const REFRESH_STORAGE_KEY = "refresh_token";
 
 //허동운 죽어라
@@ -96,7 +95,7 @@ const LoadGame: React.FC<LoadGameProps> = ({ onNavigate }) => {
         const { accessToken, userId } = await refreshAccessToken();
         if (!userId) throw new Error("유저 ID를 가져올 수 없습니다.");
 
-        const response = await axios.get<SaveData[]>(SAVES_ENDPOINT, {
+        const response = await axios.get<SaveData[]>(`${API_BASE_URL}/api/v1/saves/saves`, {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             'user-id': userId,
@@ -107,7 +106,7 @@ const LoadGame: React.FC<LoadGameProps> = ({ onNavigate }) => {
         const data = response.data;
 
         const formattedSlots: SaveSlotData[] = data
-          .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 6)
           .map((save, index) => ({
             slotNumber: index + 1,

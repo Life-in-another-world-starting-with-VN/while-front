@@ -70,10 +70,10 @@ function MainPage() {
         <Overlay />
         <HeroCard>
           <HeroEyebrow>오늘의 여정</HeroEyebrow>
-          <HeroTitle>감정으로 완성하는 몰입형 스토리</HeroTitle>
+          <HeroTitle>다시 플레이하는 지루함에서 벗어나세요</HeroTitle>
           <HeroDescription>
             실시간 감정 감지와 선택 기반 전개가 결합된 WHILE에서 나만의 스토리를 만들어 보세요.
-            마지막으로 머물렀던 장면부터 바로 이어서 플레이할 수 있습니다.
+            마지막으로 플레이 했던 장면부터 바로 이어서 플레이할 수 있습니다.
           </HeroDescription>
           <HeroHighlights>
             <HighlightCard>

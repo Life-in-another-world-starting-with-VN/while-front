@@ -7,7 +7,7 @@ import type { SettingsProps } from './type';
 import type { SettingsState } from '../../types';
 
 type AudioSettingKey = 'backgroundVolume' | 'soundEffectVolume' | 'voiceVolume';
-type SliderKey = 'textSpeed' | 'autoProgressTime' | AudioSettingKey;
+type SliderKey = 'textSpeed' | 'autoProgressTime' | 'characterSize' | AudioSettingKey;
 
 const SETTINGS_STORAGE_KEY = 'gameSettings';
 
@@ -22,6 +22,7 @@ const defaultSettings: SettingsState = {
   soundEffectVolume: 70,
   voiceVolume: 70,
   isMuted: false,
+  characterSize: 100, // 100% (기본 크기)
 };
 
 const AUDIO_SETTING_KEYS = new Set<AudioSettingKey>([
@@ -77,6 +78,12 @@ const normalizeSettings = (raw: Partial<SettingsState> | null | undefined): Sett
       defaultSettings.voiceVolume,
     ),
     isMuted: Boolean(raw.isMuted),
+    characterSize: clampNumber(
+      raw.characterSize,
+      50,
+      150,
+      defaultSettings.characterSize,
+    ),
   };
 
   if (

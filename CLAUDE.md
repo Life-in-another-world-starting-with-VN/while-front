@@ -3,6 +3,19 @@
 ## 프로젝트 개요
 미연시 게임의 설정 페이지와 게임 관리 UI를 개발하는 React + TypeScript 프로젝트입니다.
 
+### ✨ 새로운 기능: 동적 캐릭터 표정 시스템
+스토리 진행에 따라 캐릭터 표정이 자동으로 변경됩니다!
+- 9가지 표정 지원 (화남, 웃음, 미소, 슬픔, 걱정, 당황, 부끄러움, 생각, 놀람)
+- 텍스트 기반 자동 감정 감지
+- 3명의 캐릭터 지원
+- **캐릭터 크기 조절 기능** (50% ~ 150%)
+- **AI 성격별 기본 표정** 🤖 (츤데레→무표정, 활발함→미소 등)
+- **선택지 2-3개 제한** ✨ NEW! (깔끔한 UI/UX)
+- 자세한 내용: [CHARACTER_EXPRESSION_SYSTEM.md](./CHARACTER_EXPRESSION_SYSTEM.md)
+- 크기 조절 가이드: [CHARACTER_SIZE_FEATURE.md](./CHARACTER_SIZE_FEATURE.md)
+- AI 성격 시스템: [AI_PERSONALITY_SYSTEM.md](./AI_PERSONALITY_SYSTEM.md)
+- 선택지 제한 기능: [CHOICE_LIMIT_FEATURE.md](./CHOICE_LIMIT_FEATURE.md)
+
 ## 기술 스택
 - **Frontend**: React 19.1.1 + TypeScript
 - **Build Tool**: Vite 7.1.6

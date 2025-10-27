@@ -32,7 +32,13 @@ export interface SettingsState {
 
   // 전체 음소거
   isMuted: boolean;
+
+  // 캐릭터 설정
+  characterSize: number; // 50~150 (percentage)
 }
 
 export type ColorToken = keyof typeof import('../styles/theme').colors;
 export type TypographySize = keyof typeof import('../styles/theme').typography.sizes;
+
+// Character expression types
+export * from './character';

@@ -27,11 +27,9 @@ import DialogueLogModal from './components/DialogueLogModal';
 import { mockMenuItems } from './data/mockGameData';
 import type { MenuAction } from '../../types/game';
 import EmotionStatusWidget from '../../components/EmotionStatusWidget';
-
-// 캐릭터 이미지 import
-import char1 from '../../assets/MainCharacter/char1.png';
-import char2 from '../../assets/MainCharacter/char2.png';
-import char3 from '../../assets/MainCharacter/char3.png';
+import { detectEmotion } from '../../utils/emotionDetector';
+import { getCharacterIdFromName } from '../../utils/characterAssets';
+import type { CharacterExpression } from '../../types/character';
 
 interface GamePageProps {
   backgroundImage?: string;
@@ -370,14 +368,6 @@ interface DialogueLogItem {
 }
 
 type GameSetupMode = 'loading' | 'select' | 'create' | 'playing';
-
-// 캐릭터 이미지 매핑 함수
-const getCharacterImage = (characterName: string): string => {
-  // 캐릭터 이름에 따라 다른 이미지 반환
-  const nameHash = characterName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const images = [char1, char2, char3];
-  return images[nameHash % images.length];
-};
 
 const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   const { accessToken, refreshAccessToken } = useAuth();
@@ -767,6 +757,19 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
     currentDialogueIndex === storyState.dialogues.length - 1 &&
     storyState.available_choices.length > 0;
 
+  // Get character personality (from game or dialogue)
+  const characterPersonality = currentDialogue?.character_personality || currentGame?.personality;
+
+  // Detect emotion from dialogue text or use provided emotion
+  // AI uses personality to determine default expression (e.g., tsundere -> thinking face)
+  const currentExpression: CharacterExpression = currentDialogue?.emotion
+    || detectEmotion(currentDialogue?.text_template || '', characterPersonality);
+
+  // Get character ID from name for consistent character assignment
+  const characterId = currentDialogue?.character_name
+    ? getCharacterIdFromName(currentDialogue.character_name)
+    : '1';
+
   return (
     <Container backgroundImage={storyState.background_url || backgroundImage}>
       <PinkBlurOverlay />
@@ -777,8 +780,9 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
       {/* 캐릭터 스프라이트 표시 (나레이션일 때는 숨김) */}
       {currentDialogue && currentDialogue.character_name && currentDialogue.character_name !== "나레이션" && (
         <CharacterSprite
-          sprite={getCharacterImage(currentDialogue.character_name)}
+          characterId={characterId}
           characterName={currentDialogue.character_name}
+          expression={currentExpression}
         />
       )}
 

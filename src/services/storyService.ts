@@ -1,6 +1,8 @@
 // Story Engine Service for Gameplay
 import { apiRequest } from './api';
 
+import type { CharacterExpression } from '../types/character';
+
 export interface StoryState {
   scene_id: string;
   scene_title: string;
@@ -11,6 +13,8 @@ export interface StoryState {
     character_id: string | null;
     character_name: string;
     scene_id: string;
+    emotion?: CharacterExpression;  // 캐릭터 표정 (옵션)
+    character_personality?: string; // 캐릭터 성격 (옵션) - AI 분석용
   }>;
   available_choices: Array<{
     id: string;

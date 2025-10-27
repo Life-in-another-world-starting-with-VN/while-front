@@ -17,7 +17,7 @@ interface SettingsContentProps {
     option: 'skipUnreadText' | 'skipAfterChoice' | 'skipScreenTransition'
   ) => void;
   onSliderChange: (
-    key: 'textSpeed' | 'autoProgressTime' | 'backgroundVolume' | 'soundEffectVolume' | 'voiceVolume',
+    key: 'textSpeed' | 'autoProgressTime' | 'characterSize' | 'backgroundVolume' | 'soundEffectVolume' | 'voiceVolume',
     value: number,
   ) => void;
   onMuteToggle: () => void;
@@ -89,6 +89,13 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
             min={1}
             max={10}
             onChange={value => onSliderChange('autoProgressTime', value)}
+          />
+          <Slider
+            label="캐릭터 크기"
+            value={settings.characterSize}
+            min={50}
+            max={150}
+            onChange={value => onSliderChange('characterSize', value)}
           />
         </SliderColumn>
 

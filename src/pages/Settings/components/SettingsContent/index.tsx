@@ -3,7 +3,11 @@ import SettingGroup from '../SettingGroup';
 import Slider from '../../../../components/common/Slider';
 import {
   RightSection,
+  Header,
+  HeaderTitle,
+  HeaderSubtitle,
   SettingsGrid,
+  SectionCard,
   SliderSection,
   SliderColumn,
   MuteButton,
@@ -63,15 +67,20 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
 
   return (
     <RightSection>
+      <Header>
+        <HeaderTitle>나만의 플레이 환경</HeaderTitle>
+        <HeaderSubtitle>
+          화면 모드부터 오디오 제어까지 세부 설정을 자유롭게 조절해 몰입감을 높여보세요.
+        </HeaderSubtitle>
+      </Header>
+
       <SettingsGrid>
-        <SettingGroup
-          title="화면 모드"
-          options={displayModeOptions}
-        />
-        <SettingGroup
-          title="넘기기"
-          options={skipOptions}
-        />
+        <SectionCard>
+          <SettingGroup title="화면 모드" options={displayModeOptions} />
+        </SectionCard>
+        <SectionCard>
+          <SettingGroup title="넘기기" options={skipOptions} />
+        </SectionCard>
       </SettingsGrid>
 
       <SliderSection>

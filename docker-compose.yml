@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  while-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    container_name: while-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - while-network
+
+networks:
+  while-network:
+    driver: bridge

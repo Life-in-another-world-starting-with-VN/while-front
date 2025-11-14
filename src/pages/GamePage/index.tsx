@@ -2,45 +2,35 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useSearchParams } from 'react-router-dom';
 import { theme } from '../../styles';
-import { useAuth } from '../../store/AuthContext';
-import {
-  getGames,
-  createGame,
-  getGame,
-  type GameResponse,
-  type GameDetailResponse,
-  type GameCreateRequest,
-} from '../../services/gameService';
-import {
-  startGame,
-  getStoryState,
-  makeChoice,
-  getProgress,
-  type StoryState,
-} from '../../services/storyService';
+import { useGameState } from '../../hooks/useGameState';
+import { normalizeEmotionData, getDefaultEmotionData } from '../../utils/emotionUtils';
+import { useEmotionDetection } from '../../hooks/useEmotionDetection';
 import DialogueBox from './components/DialogueBox';
 import GameMenu from './components/GameMenu';
 import ChoiceButtons from './components/ChoiceButtons';
 import AutoPlayModal from './components/AutoPlayModal';
 import CharacterSprite from './components/CharacterSprite';
 import DialogueLogModal from './components/DialogueLogModal';
+import GameTimer from './components/GameTimer';
+import TimeUpModal from './components/TimeUpModal';
 import { mockMenuItems } from './data/mockGameData';
 import type { MenuAction } from '../../types/game';
 import EmotionStatusWidget from '../../components/EmotionStatusWidget';
 import { detectEmotion } from '../../utils/emotionDetector';
 import { getCharacterIdFromName } from '../../utils/characterAssets';
-import type { CharacterExpression } from '../../types/character';
+import type { CharacterExpression, CharacterId } from '../../types/character';
+import type { CreateGameRequest, EmotionData as V2EmotionData, SceneData } from '../../types/api-v2';
 
 interface GamePageProps {
   backgroundImage?: string;
 }
 
-const Container = styled.div<{ backgroundImage?: string }>`
+const Container = styled.div<{ $backgroundImage?: string }>`
   width: 100%;
   height: 100vh;
   background: ${props =>
-    props.backgroundImage
-      ? `url(${props.backgroundImage}) center/cover no-repeat`
+    props.$backgroundImage
+      ? `url(${props.$backgroundImage}) center/cover no-repeat`
       : '#000000'
   };
   position: relative;
@@ -126,6 +116,37 @@ const Input = styled.input`
   }
 `;
 
+const CheckboxField = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #edf2f7;
+  }
+`;
+
+const Checkbox = styled.input`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #667eea;
+`;
+
+const CheckboxLabel = styled.label`
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2d3748;
+  cursor: pointer;
+  user-select: none;
+  flex: 1;
+`;
+
 
 
 const Button = styled.button`
@@ -154,36 +175,7 @@ const Button = styled.button`
   }
 `;
 
-const GameSelectList = styled.div`
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 1.5rem;
-`;
 
-const GameItem = styled.div`
-  padding: 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  margin-bottom: 0.75rem;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-
-  &:hover {
-    border-color: #667eea;
-    background: #f7fafc;
-  }
-`;
-
-const GameItemTitle = styled.div`
-  font-weight: 600;
-  color: #1a202c;
-  margin-bottom: 0.25rem;
-`;
-
-const GameItemInfo = styled.div`
-  font-size: 0.875rem;
-  color: #718096;
-`;
 
 const BackButton = styled.button`
   padding: 0.75rem 1.5rem;
@@ -367,101 +359,74 @@ interface DialogueLogItem {
   text: string;
 }
 
-type GameSetupMode = 'loading' | 'select' | 'create' | 'playing';
+type GameSetupMode = 'create' | 'playing';
+
+// Hidden timer component - only tracks time without displaying
+const HiddenTimer: React.FC<{ durationMinutes: number; onTimeUp: () => void }> = ({ durationMinutes, onTimeUp }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onTimeUp();
+    }, durationMinutes * 60 * 1000);
+
+    return () => clearTimeout(timer);
+  }, [durationMinutes, onTimeUp]);
+
+  return null;
+};
 
 const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
-  const { accessToken, refreshAccessToken } = useAuth();
-  // const navigate = useNavigate(); // Not used in current implementation
   const [searchParams] = useSearchParams();
   const gameIdParam = searchParams.get('gameId');
 
-  const [mode, setMode] = useState<GameSetupMode>('loading');
+  // Use v2 game state hook
+  const {
+    gameState,
+    createNewGame,
+    proceedToNextScene,
+    selectChoice,
+    getCurrentScene,
+    isLastScene,
+  } = useGameState();
+
+  // Emotion detection hook
+  const { expression: emotionExpression } = useEmotionDetection();
+
+  const [mode, setMode] = useState<GameSetupMode>('create');
   const [error, setError] = useState<string | null>(null);
 
-  // Game selection state
-  const [availableGames, setAvailableGames] = useState<GameResponse[]>([]);
-
   // Game creation state
-  const [gameForm, setGameForm] = useState<GameCreateRequest>({
+  const [gameForm, setGameForm] = useState<CreateGameRequest>({
     personality: '',
     genre: '',
-    playtime: 30, // 기본값 30분
+    playtime: 5, // 시연용 버전 - 5분 고정
   });
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [showStartConfirm, setShowStartConfirm] = useState(false);
-  const [createdGameId, setCreatedGameId] = useState<string | null>(null);
+  const [showTimer, setShowTimer] = useState(true); // 타이머 표시 여부
 
-  // Current game state
-  const [currentGame, setCurrentGame] = useState<GameDetailResponse | null>(null);
-  const [storyState, setStoryState] = useState<StoryState | null>(null);
-  // const [progress, setProgress] = useState<ProgressResponse | null>(null); // Not displayed in current implementation
-  const [currentDialogueIndex, setCurrentDialogueIndex] = useState(0);
+  // Scene navigation state
+  const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const [dialogueLog, setDialogueLog] = useState<DialogueLogItem[]>([]);
+  const [previousDialogueScene, setPreviousDialogueScene] = useState<SceneData | null>(null);
 
   // Modal states
   const [isAutoPlayModalOpen, setIsAutoPlayModalOpen] = useState(false);
   const [isDialogueLogModalOpen, setIsDialogueLogModalOpen] = useState(false);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [autoPlaySpeed, setAutoPlaySpeed] = useState(3000);
+  const [isTimeUpModalOpen, setIsTimeUpModalOpen] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState<number | null>(null);
 
-  // Get or refresh access token
-  const getToken = useCallback(async (): Promise<string> => {
-    if (accessToken) return accessToken;
-    const refreshed = await refreshAccessToken();
-    return refreshed.accessToken;
-  }, [accessToken, refreshAccessToken]);
-
-  // Load games on mount
+  // Check if game is already loaded from URL params (future enhancement)
   useEffect(() => {
-    const loadGames = async () => {
-      try {
-        const token = await getToken();
-
-        if (gameIdParam) {
-          // If gameId in URL, try to load that game directly
-          const gameDetail = await getGame(gameIdParam, token);
-          setCurrentGame(gameDetail);
-          await loadGameState(gameIdParam, token);
-          setMode('playing');
-        } else {
-          // Otherwise show game selection
-          const games = await getGames(token);
-          setAvailableGames(games);
-          setMode(games.length > 0 ? 'select' : 'create');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : '게임 목록을 불러오는데 실패했습니다.');
-        setMode('create');
-      }
-    };
-
-    loadGames();
-  }, [gameIdParam, getToken]);
-
-  // Load game state
-  const loadGameState = async (gameId: string, token: string) => {
-    try {
-      const state = await getStoryState(gameId, token);
-      setStoryState(state);
-      setCurrentDialogueIndex(0);
-
-      await getProgress(gameId, token);
-      // setProgress(prog); // Progress stored but not displayed yet
-    } catch (err) {
-      // If no state exists, start new game
-      try {
-        await startGame(gameId, token);
-        // setProgress(prog); // Progress stored but not displayed yet
-        const state = await getStoryState(gameId, token);
-        setStoryState(state);
-        setCurrentDialogueIndex(0);
-      } catch (startErr) {
-        throw startErr;
-      }
+    if (gameIdParam) {
+      // Future: Load existing game from URL
+      // For now, just show create screen
+      setMode('create');
     }
-  };
+  }, [gameIdParam]);
 
-  // Create new game
+  // Create new game using v2 API
   const handleCreateGame = async () => {
     try {
       setError(null);
@@ -481,9 +446,10 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
       }
 
       setIsCreatingGame(true);
-      const token = await getToken();
-      const newGame = await createGame(gameForm, token);
-      setCreatedGameId(newGame.id);
+
+      // Create game using v2 API and initialize game state
+      await createNewGame(gameForm);
+
       setIsCreatingGame(false);
       setShowStartConfirm(true);
     } catch (err) {
@@ -493,86 +459,114 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   };
 
   // Start created game
-  const handleStartCreatedGame = async () => {
-    if (!createdGameId) return;
-    try {
-      setShowStartConfirm(false);
-      const token = await getToken();
-      const gameDetail = await getGame(createdGameId, token);
-      setCurrentGame(gameDetail);
-      await loadGameState(createdGameId, token);
-      setMode('playing');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '게임을 시작하는데 실패했습니다.');
-    }
+  const handleStartCreatedGame = () => {
+    setShowStartConfirm(false);
+    setCurrentSceneIndex(0);
+    setGameStartTime(Date.now());
+    setMode('playing');
+  };
+
+  // Handle time up
+  const handleTimeUp = () => {
+    setIsTimeUpModalOpen(true);
+    setIsAutoPlay(false);
+  };
+
+  // Restart game
+  const handleRestartGame = () => {
+    setIsTimeUpModalOpen(false);
+    setMode('create');
+    setCurrentSceneIndex(0);
+    setDialogueLog([]);
+    setGameStartTime(null);
+    setError(null);
+  };
+
+  // Exit game
+  const handleExitGame = () => {
+    window.history.back();
   };
 
   // Cancel starting game
   const handleCancelStart = () => {
     setShowStartConfirm(false);
-    setCreatedGameId(null);
-    setMode('select');
+    setMode('create');
   };
 
-  // Select existing game
-  const handleSelectGame = async (game: GameResponse) => {
-    try {
-      setError(null);
-      const token = await getToken();
-      const gameDetail = await getGame(game.id, token);
-      setCurrentGame(gameDetail);
-      await loadGameState(game.id, token);
-      setMode('playing');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '게임을 불러오는데 실패했습니다.');
+  // Get current emotion data for API calls
+  const getCurrentEmotionData = useCallback((): V2EmotionData => {
+    // If emotion detection is available, use it
+    if (emotionExpression) {
+      // Map face-api emotion labels to v2 API format
+      const emotionMap: Record<string, Partial<V2EmotionData>> = {
+        '무표정': { neutral: 100 },
+        '행복': { happy: 100 },
+        '슬픔': { sad: 100 },
+        '분노': { angry: 100 },
+        '두려움': { fear: 100 },
+        '혐오': { disgust: 100 },
+        '놀람': { surprise: 100 },
+      };
+
+      const mappedEmotion = emotionMap[emotionExpression.label];
+      if (mappedEmotion) {
+        return normalizeEmotionData(mappedEmotion as Partial<V2EmotionData>);
+      }
     }
-  };
 
-  // Navigate to next dialogue
-  const handleNextDialogue = async () => {
-    if (!storyState || !currentGame) return;
+    // Default to neutral emotion
+    return getDefaultEmotionData();
+  }, [emotionExpression]);
 
-    const currentDialogue = storyState.dialogues[currentDialogueIndex];
+  // Navigate to next scene (for dialogue type scenes)
+  const handleNextScene = useCallback(async () => {
+    const currentScene = getCurrentScene();
+    if (!currentScene) return;
 
-    if (currentDialogue) {
+    // Add to dialogue log
+    if (currentScene.dialogue) {
       setDialogueLog(prev => [
         ...prev,
         {
-          characterName: currentDialogue.character_name || '캐릭터',
-          text: currentDialogue.text_template,
+          characterName: currentScene.role || '캐릭터',
+          text: currentScene.dialogue || '',
         },
       ]);
     }
 
-    if (currentDialogueIndex < storyState.dialogues.length - 1) {
-      setCurrentDialogueIndex(prev => prev + 1);
+    // Check if we need to move to next scene in the array
+    if (!isLastScene()) {
+      // Move to next scene in current array
+      setCurrentSceneIndex(prev => prev + 1);
+    } else {
+      // Need to fetch next scenes from API (for dialogue type)
+      if (currentScene.type === 'dialogue') {
+        try {
+          const emotionData = getCurrentEmotionData();
+          await proceedToNextScene(emotionData);
+          setCurrentSceneIndex(0);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : '다음 씬을 불러오는데 실패했습니다.');
+        }
+      }
     }
-  };
+  }, [getCurrentScene, isLastScene, proceedToNextScene, getCurrentEmotionData]);
 
-  // Handle choice selection
+  // Handle choice selection (for selection/selections type scenes)
   const handleChoiceSelect = async (choiceId: string) => {
-    if (!currentGame || !storyState) return;
+    const currentScene = getCurrentScene();
+    if (!currentScene || (currentScene.type !== 'selection' && currentScene.type !== 'selections')) return;
 
     try {
-      const token = await getToken();
-      const currentDialogue = storyState.dialogues[currentDialogueIndex];
-
-      // 선택한 choice 찾기
-      const selectedChoice = storyState.available_choices.find(c => c.id === choiceId);
-
-      // next_scene_id가 null이면 게임 종료
-      if (selectedChoice && !selectedChoice.next_scene_id) {
-        alert('게임이 종료되었습니다! 🎉\n다시 플레이하시려면 새로고침 해주세요.');
-        window.location.reload();
+      const selectionId = parseInt(choiceId, 10);
+      if (isNaN(selectionId)) {
+        setError('잘못된 선택지입니다.');
         return;
       }
 
-      const newState = await makeChoice(currentGame.id, currentDialogue.id, choiceId, token);
-      setStoryState(newState);
-      setCurrentDialogueIndex(0);
-
-      await getProgress(currentGame.id, token);
-      // setProgress(prog); // Progress stored but not displayed yet
+      const emotionData = getCurrentEmotionData();
+      await selectChoice(selectionId, emotionData);
+      setCurrentSceneIndex(0);
     } catch (err) {
       setError(err instanceof Error ? err.message : '선택 처리에 실패했습니다.');
     }
@@ -585,7 +579,7 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
         setIsDialogueLogModalOpen(true);
         break;
       case 'skip':
-        handleNextDialogue();
+        handleNextScene();
         break;
       case 'auto':
         setIsAutoPlayModalOpen(true);
@@ -598,44 +592,53 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
     }
   };
 
+  // Update previous dialogue scene when current scene changes
+  useEffect(() => {
+    const currentScene = getCurrentScene();
+    if (currentScene?.type === 'dialogue') {
+      setPreviousDialogueScene(currentScene);
+    }
+  }, [currentSceneIndex, getCurrentScene]);
+
   // Auto-play effect
   useEffect(() => {
-    if (isAutoPlay && storyState && currentDialogueIndex < storyState.dialogues.length - 1) {
+    const currentScene = getCurrentScene();
+    if (isAutoPlay && currentScene && currentScene.type === 'dialogue') {
       const timer = setTimeout(() => {
-        handleNextDialogue();
+        handleNextScene();
       }, autoPlaySpeed);
 
       return () => clearTimeout(timer);
     }
-  }, [isAutoPlay, currentDialogueIndex, autoPlaySpeed, storyState]);
+  }, [isAutoPlay, currentSceneIndex, autoPlaySpeed, getCurrentScene, handleNextScene]);
+
+  // Keyboard event handler for Space and Enter keys
+  useEffect(() => {
+    if (mode !== 'playing') return;
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+      const currentScene = getCurrentScene();
+      if (!currentScene) return;
+
+      // 선택지가 있는 경우에는 키보드 진행 비활성화
+      const showChoices = currentScene.type === 'selection' || currentScene.type === 'selections';
+      if (showChoices) return;
+
+      // 로딩 중이거나 자동 재생 중일 때는 키보드 진행 비활성화
+      if (gameState.isLoading || isAutoPlay) return;
+
+      // 스페이스바 또는 엔터 키 감지
+      if (event.code === 'Space' || event.code === 'Enter') {
+        event.preventDefault(); // 기본 동작 방지 (스크롤 등)
+        handleNextScene();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [mode, getCurrentScene, gameState.isLoading, isAutoPlay, handleNextScene]);
 
   // Render game setup screens
-  if (mode === 'loading') {
-    return <LoadingScreen>게임을 불러오는 중...</LoadingScreen>;
-  }
-
-  if (mode === 'select') {
-    return (
-      <GameSetupScreen>
-        <SetupCard>
-          <SetupTitle>게임 선택</SetupTitle>
-          {error && <ErrorMessage>{error}</ErrorMessage>}
-          <GameSelectList>
-            {availableGames.map(game => (
-              <GameItem key={game.id} onClick={() => handleSelectGame(game)}>
-                <GameItemTitle>{game.title}</GameItemTitle>
-                <GameItemInfo>
-                  {game.genre} · {game.personality} · {game.playtime}분
-                </GameItemInfo>
-              </GameItem>
-            ))}
-          </GameSelectList>
-          <Button onClick={() => setMode('create')}>새 게임 만들기</Button>
-          <BackButton onClick={() => window.history.back()}>뒤로가기</BackButton>
-        </SetupCard>
-      </GameSetupScreen>
-    );
-  }
 
   if (mode === 'create') {
     return (
@@ -670,26 +673,29 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
               <Label>예상 플레이 시간 (분)</Label>
               <Input
                 type="number"
-                min="5"
-                max="100"
-                value={gameForm.playtime}
-                onChange={e => setGameForm({ ...gameForm, playtime: parseInt(e.target.value) || 5 })}
-                disabled={isCreatingGame}
+                value={5}
+                disabled
+                style={{ backgroundColor: '#f7fafc', cursor: 'not-allowed' }}
               />
-              <InputHint>최소 5분 ~ 최대 100분 (권장: 30~60분)</InputHint>
+              <InputHint>시연용 버전이므로 플레이 타임이 5분으로 고정되어 있습니다. 양해 부탁드립니다.</InputHint>
+            </FormField>
+            <FormField>
+              <CheckboxField onClick={() => !isCreatingGame && setShowTimer(!showTimer)}>
+                <Checkbox
+                  type="checkbox"
+                  id="showTimer"
+                  checked={showTimer}
+                  onChange={e => setShowTimer(e.target.checked)}
+                  disabled={isCreatingGame}
+                />
+                <CheckboxLabel htmlFor="showTimer">
+                  7분 시연 타이머 표시 (시간 종료 시 자동 종료)
+                </CheckboxLabel>
+              </CheckboxField>
             </FormField>
             <Button onClick={handleCreateGame} disabled={isCreatingGame}>
               {isCreatingGame ? '생성 중...' : '게임 생성하기'}
             </Button>
-            {availableGames.length > 0 && (
-              <Button
-                onClick={() => setMode('select')}
-                style={{ marginTop: '1rem', background: '#718096' }}
-                disabled={isCreatingGame}
-              >
-                기존 게임 선택
-              </Button>
-            )}
             <BackButton onClick={() => window.history.back()} disabled={isCreatingGame}>
               뒤로가기
             </BackButton>
@@ -733,104 +739,161 @@ const GamePage: React.FC<GamePageProps> = ({ backgroundImage }) => {
   }
 
   // Render gameplay
-  if (!storyState || !currentGame) {
-    return <LoadingScreen>게임을 시작하는 중...</LoadingScreen>;
-  }
+  if (mode === 'playing') {
+    // Check if game has no scenes (error state)
+    if (!gameState.isLoading && gameState.scenes.length === 0) {
+      return (
+        <LoadingScreen>
+          <div>스토리 데이터가 없습니다.</div>
+          <div style={{ fontSize: '1rem', marginTop: '1rem', color: 'rgba(255,255,255,0.7)' }}>
+            게임이 아직 생성 중이거나 데이터가 준비되지 않았습니다.
+          </div>
+          <ErrorMessage style={{ marginTop: '2rem' }} onClick={() => window.location.reload()}>
+            새로고침
+          </ErrorMessage>
+        </LoadingScreen>
+      );
+    }
 
-  // Check if game has no dialogues
-  if (storyState.dialogues.length === 0) {
+    // Get current scene (or use first scene if loading)
+    const currentScene = gameState.scenes[currentSceneIndex] || gameState.scenes[0];
+
+    // Determine if we should show choices
+    const showChoices = currentScene && (currentScene.type === 'selection' || currentScene.type === 'selections') && currentScene.selections;
+
+    // selection 씬이면 직전 dialogue 씬 사용, 아니면 현재 씬 사용
+    const displayScene = (showChoices && previousDialogueScene) ? previousDialogueScene : currentScene;
+
+    // Parse character_filename if provided (format: "3_anger.png")
+    const parseCharacterFilename = (filename: string | null | undefined): { characterId: CharacterId; expression: CharacterExpression } | null => {
+      if (!filename) return null;
+      
+      // Extract character ID and expression from filename (e.g., "3_anger.png" -> id: "3", expression: "anger")
+      const match = filename.match(/^([123])_([a-z]+)\.png$/);
+      if (!match) return null;
+      
+      const [, id, expr] = match;
+      const characterId = id as CharacterId;
+      
+      // Map expression name to CharacterExpression type
+      const expressionMap: Record<string, CharacterExpression> = {
+        'anger': 'anger',
+        'laugh': 'laugh',
+        'smile': 'smile',
+        'sad': 'sad',
+        'worry': 'worry',
+        'embarrassed': 'embarrassed',
+        'blush': 'blush',
+        'thinking': 'thinking',
+        'surprise': 'surprise',
+      };
+      
+      const expression = expressionMap[expr];
+      if (!expression) return null;
+      
+      return { characterId, expression };
+    };
+
+    const parsedCharacter = parseCharacterFilename(displayScene?.character_filename);
+    
+    // Use parsed values from character_filename if available, otherwise detect from dialogue
+    const currentExpression: CharacterExpression = parsedCharacter?.expression
+      || (displayScene?.dialogue ? detectEmotion(displayScene.dialogue, gameForm.personality) : 'smile');
+
+    // Get character ID from character_filename or role name
+    const characterId = parsedCharacter?.characterId
+      || (displayScene?.role ? getCharacterIdFromName(displayScene.role) : '1');
+
+    const characterImageId: CharacterId = characterId;
+
+    // 배경 URL 처리: API에서 받은 URL이 있으면 baseURL과 결합
+    const finalBackgroundUrl = gameState.backgroundUrl
+      ? `${import.meta.env.VITE_API_BASE_URL || ''}${gameState.backgroundUrl}`
+      : backgroundImage;
+
     return (
-      <LoadingScreen>
-        <div>스토리 데이터가 없습니다.</div>
-        <div style={{ fontSize: '1rem', marginTop: '1rem', color: 'rgba(255,255,255,0.7)' }}>
-          게임이 아직 생성 중이거나 데이터가 준비되지 않았습니다.
-        </div>
-        <ErrorMessage style={{ marginTop: '2rem' }} onClick={() => window.location.reload()}>
-          새로고침
-        </ErrorMessage>
-      </LoadingScreen>
+      <Container $backgroundImage={finalBackgroundUrl}>
+        <PinkBlurOverlay />
+        <EmotionStatusWidget />
+        
+        {/* 게임 타이머 - 7분 제한 (showTimer가 true일 때만 표시) */}
+        {gameStartTime && showTimer && (
+          <GameTimer durationMinutes={5} onTimeUp={handleTimeUp} />
+        )}
+        
+        {/* 타이머 숨김 모드 - 백그라운드에서만 시간 체크 */}
+        {gameStartTime && !showTimer && (
+          <HiddenTimer durationMinutes={5} onTimeUp={handleTimeUp} />
+        )}
+
+        {!showChoices && !gameState.isLoading && <ClickableOverlay onClick={handleNextScene} />}
+
+        {/* 캐릭터 스프라이트 표시 (나레이션과 narrator일 때는 숨김) */}
+        {displayScene?.role && displayScene.role !== "나레이션" && displayScene.role !== "narrator" && (
+          <CharacterSprite
+            characterId={characterImageId}
+            characterName={displayScene.role}
+            expression={currentExpression}
+          />
+        )}
+
+        {/* 대화 상자 표시 (로딩 중이면 isLoading prop 전달) */}
+        {displayScene?.dialogue && (
+          <DialogueBox
+            characterName={displayScene.role === "narrator" ? "내레이션" : (displayScene.role || "캐릭터")}
+            text={displayScene.dialogue}
+            onClick={handleNextScene}
+            isLoading={gameState.isLoading}
+          />
+        )}
+
+        {!gameState.isLoading && showChoices && currentScene.selections && (
+          <ChoiceButtons
+            choices={Object.entries(currentScene.selections).map(([id, text]: [string, unknown]) => ({
+              id: id,
+              text: String(text),
+              nextSceneId: id,
+            }))}
+            onChoiceSelect={handleChoiceSelect}
+          />
+        )}
+
+        <GameMenu menuItems={mockMenuItems} onMenuClick={handleMenuAction} />
+
+        <AutoPlayModal
+          isOpen={isAutoPlayModalOpen}
+          isAutoPlaying={isAutoPlay}
+          onClose={() => setIsAutoPlayModalOpen(false)}
+          onSelectSpeed={speed => {
+            setAutoPlaySpeed(speed);
+            setIsAutoPlay(true);
+          }}
+          onStop={() => setIsAutoPlay(false)}
+        />
+
+        <DialogueLogModal
+          isOpen={isDialogueLogModalOpen}
+          onClose={() => setIsDialogueLogModalOpen(false)}
+          dialogueLog={dialogueLog}
+        />
+
+        <TimeUpModal
+          isOpen={isTimeUpModalOpen}
+          onRestart={handleRestartGame}
+          onExit={handleExitGame}
+        />
+
+        {(error || gameState.error) && (
+          <ErrorMessage style={{ position: 'absolute', top: '1rem', left: '50%', transform: 'translateX(-50%)', zIndex: 1000 }}>
+            {error || gameState.error}
+          </ErrorMessage>
+        )}
+      </Container>
     );
   }
 
-  const currentDialogue = storyState.dialogues[currentDialogueIndex];
-  const showChoices =
-    currentDialogueIndex === storyState.dialogues.length - 1 &&
-    storyState.available_choices.length > 0;
-
-  // Get character personality (from game or dialogue)
-  const characterPersonality = currentDialogue?.character_personality || currentGame?.personality;
-
-  // Detect emotion from dialogue text or use provided emotion
-  // AI uses personality to determine default expression (e.g., tsundere -> thinking face)
-  const currentExpression: CharacterExpression = currentDialogue?.emotion
-    || detectEmotion(currentDialogue?.text_template || '', characterPersonality);
-
-  // Get character ID from name for consistent character assignment
-  const characterId = currentDialogue?.character_name
-    ? getCharacterIdFromName(currentDialogue.character_name)
-    : '1';
-
-  return (
-    <Container backgroundImage={storyState.background_url || backgroundImage}>
-      <PinkBlurOverlay />
-      <EmotionStatusWidget />
-
-      {!showChoices && <ClickableOverlay onClick={handleNextDialogue} />}
-
-      {/* 캐릭터 스프라이트 표시 (나레이션일 때는 숨김) */}
-      {currentDialogue && currentDialogue.character_name && currentDialogue.character_name !== "나레이션" && (
-        <CharacterSprite
-          characterId={characterId}
-          characterName={currentDialogue.character_name}
-          expression={currentExpression}
-        />
-      )}
-
-      {currentDialogue && (
-        <DialogueBox
-          characterName={currentDialogue.character_name || "캐릭터"}
-          text={currentDialogue.text_template}
-          onClick={handleNextDialogue}
-        />
-      )}
-
-      {showChoices && (
-        <ChoiceButtons
-          choices={storyState.available_choices.map(choice => ({
-            id: choice.id,
-            text: choice.text,
-            nextSceneId: choice.next_scene_id || '',
-          }))}
-          onChoiceSelect={handleChoiceSelect}
-        />
-      )}
-
-      <GameMenu menuItems={mockMenuItems} onMenuClick={handleMenuAction} />
-
-      <AutoPlayModal
-        isOpen={isAutoPlayModalOpen}
-        isAutoPlaying={isAutoPlay}
-        onClose={() => setIsAutoPlayModalOpen(false)}
-        onSelectSpeed={speed => {
-          setAutoPlaySpeed(speed);
-          setIsAutoPlay(true);
-        }}
-        onStop={() => setIsAutoPlay(false)}
-      />
-
-      <DialogueLogModal
-        isOpen={isDialogueLogModalOpen}
-        onClose={() => setIsDialogueLogModalOpen(false)}
-        dialogueLog={dialogueLog}
-      />
-
-      {error && (
-        <ErrorMessage style={{ position: 'absolute', top: '1rem', left: '50%', transform: 'translateX(-50%)', zIndex: 1000 }}>
-          {error}
-        </ErrorMessage>
-      )}
-    </Container>
-  );
+  // Default: return null or create screen
+  return null;
 };
 
 export default GamePage;

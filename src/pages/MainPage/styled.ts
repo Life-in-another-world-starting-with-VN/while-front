@@ -1,8 +1,10 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const PageContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
-  background: #e8f4ff;
+  align-items: stretch;
+  background: linear-gradient(135deg, #fdf6ff 0%, #e4f1ff 45%, #f6fbff 100%);
+  overflow: hidden;
 `;

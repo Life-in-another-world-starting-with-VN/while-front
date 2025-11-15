@@ -3,7 +3,11 @@ import SettingGroup from '../SettingGroup';
 import Slider from '../../../../components/common/Slider';
 import {
   RightSection,
+  Header,
+  HeaderTitle,
+  HeaderSubtitle,
   SettingsGrid,
+  SectionCard,
   SliderSection,
   SliderColumn,
   MuteButton,
@@ -17,7 +21,7 @@ interface SettingsContentProps {
     option: 'skipUnreadText' | 'skipAfterChoice' | 'skipScreenTransition'
   ) => void;
   onSliderChange: (
-    key: 'textSpeed' | 'autoProgressTime' | 'backgroundVolume' | 'soundEffectVolume' | 'voiceVolume',
+    key: 'textSpeed' | 'autoProgressTime' | 'characterSize' | 'backgroundVolume' | 'soundEffectVolume' | 'voiceVolume',
     value: number,
   ) => void;
   onMuteToggle: () => void;
@@ -63,15 +67,20 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
 
   return (
     <RightSection>
+      <Header>
+        <HeaderTitle>나만의 플레이 환경</HeaderTitle>
+        <HeaderSubtitle>
+          화면 모드부터 오디오 제어까지 세부 설정을 자유롭게 조절해 몰입감을 높여보세요.
+        </HeaderSubtitle>
+      </Header>
+
       <SettingsGrid>
-        <SettingGroup
-          title="화면 모드"
-          options={displayModeOptions}
-        />
-        <SettingGroup
-          title="넘기기"
-          options={skipOptions}
-        />
+        <SectionCard>
+          <SettingGroup title="화면 모드" options={displayModeOptions} />
+        </SectionCard>
+        <SectionCard>
+          <SettingGroup title="넘기기" options={skipOptions} />
+        </SectionCard>
       </SettingsGrid>
 
       <SliderSection>
@@ -89,6 +98,13 @@ const SettingsContent: React.FC<SettingsContentProps> = ({
             min={1}
             max={10}
             onChange={value => onSliderChange('autoProgressTime', value)}
+          />
+          <Slider
+            label="캐릭터 크기"
+            value={settings.characterSize}
+            min={50}
+            max={150}
+            onChange={value => onSliderChange('characterSize', value)}
           />
         </SliderColumn>
 

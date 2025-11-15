@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Settings from './pages/Settings';
-import LoadGame from './pages/LoadGame';
 import QuestionPage from "./pages/QuestionPage";
 import RegisterPage from "./pages/Auth/Register";
 import LoginPage from "./pages/Auth/Login";
@@ -8,9 +7,9 @@ import MainPage from "./pages/MainPage";
 import GamePage from "./pages/GamePage";
 import { GlobalStyles } from './styles';
 import React from 'react';
-import { AuthProvider, useAuth } from './store/AuthContext';
+import { AuthProvider } from './store/AuthContext';
+import { useAuth } from './hooks/useAuth';
 import EmotionPage from "./pages/EmotionPage";
-import SavePage from "./pages/SavePage";
 
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { isAuthenticated, isInitializing } = useAuth();
@@ -49,12 +48,6 @@ const AppRoutes: React.FC = () => {
       case 'settings':
         navigate('/Settings');
         break;
-      case 'loadGame':
-        navigate('/LoadGame');
-        break;
-      case 'saveGame':
-        navigate('/SavePage');
-      break;
       case 'game':
         navigate('/Game');
         break;
@@ -72,22 +65,6 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <Settings onNavigate={handleNavigate} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/LoadGame"
-        element={
-          <ProtectedRoute>
-            <LoadGame onNavigate={handleNavigate} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/SavePage"
-        element={
-          <ProtectedRoute>
-            <SavePage onNavigate={handleNavigate} />
           </ProtectedRoute>
         }
       />
